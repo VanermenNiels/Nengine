@@ -7,6 +7,8 @@
 #include <windows.h>
 #endif
 
+#include <thread>
+
 #include <SDL3/SDL.h>
 //#include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -54,7 +56,7 @@ void PrintSDLVersion()
 	LogSDLVersion("Linked with SDL_ttf ", SDL_VERSIONNUM_MAJOR(version), SDL_VERSIONNUM_MINOR(version),	SDL_VERSIONNUM_MICRO(version));
 }
 
-dae::Minigin::Minigin(const std::filesystem::path& dataPath)
+dae::Minigin::Minigin(const std::filesystem::path& dataPath, int maxFrameRate)
 {
 	PrintSDLVersion();
 	
@@ -77,6 +79,8 @@ dae::Minigin::Minigin(const std::filesystem::path& dataPath)
 
 	Renderer::GetInstance().Init(g_window);
 	ResourceManager::GetInstance().Init(dataPath);
+
+	m_MillisecondsBetweenFrames = 1000.0f / maxFrameRate;
 }
 
 dae::Minigin::~Minigin()
@@ -91,16 +95,26 @@ void dae::Minigin::Run(const std::function<void()>& load)
 {
 	load();
 #ifndef __EMSCRIPTEN__
+
+	auto lastTime { std::chrono::high_resolution_clock::now() };
 	while (!m_quit)
-		RunOneFrame();
+		RunOneFrame(lastTime);
 #else
 	emscripten_set_main_loop_arg(&LoopCallback, this, 0, true);
 #endif
 }
 
-void dae::Minigin::RunOneFrame()
+void dae::Minigin::RunOneFrame(std::chrono::steady_clock::time_point& lastTime)
 {
+	const auto currentTime { std::chrono::high_resolution_clock::now() };
+	const auto deltaTime   { std::chrono::duration<float>(currentTime - lastTime).count() };
+	lastTime = currentTime;
+
 	m_quit = !InputManager::GetInstance().ProcessInput();
-	SceneManager::GetInstance().Update();
+	SceneManager::GetInstance().Update(deltaTime);
 	Renderer::GetInstance().Render();
+
+	const auto sleepTime { currentTime + std::chrono::milliseconds(static_cast<int>(m_MillisecondsBetweenFrames)) - std::chrono::high_resolution_clock::now() };
+
+	std::this_thread::sleep_for(sleepTime);
 }
