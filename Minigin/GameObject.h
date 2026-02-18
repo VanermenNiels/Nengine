@@ -3,6 +3,7 @@
 #include <memory>
 #include "Transform.h"
 
+class BaseComponent;
 namespace dae
 {
 	class Texture2D;
@@ -23,5 +24,36 @@ namespace dae
 		GameObject(GameObject&& other) = delete;
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
+
+		template<typename ComponentType, typename... Args>
+		ComponentType* AddComponent(Args&&... args)
+		{
+			static_assert(std::is_base_of_v<BaseComponent, ComponentType>, "ComponentType must derive from BaseComponent");
+
+			auto newComponent { std::make_unique<ComponentType>(this, std::forward<Args>(args)...) };
+			auto newComponentRawPtr { newComponent.get() };
+			m_pComponents.push_back(std::move(newComponent));
+
+			return newComponentRawPtr;
+		}
+
+		template<typename ComponentType>
+		ComponentType* GetComponent() const
+		{
+			static_assert(std::is_base_of_v<BaseComponent, ComponentType>, "ComponentType must derive from BaseComponent");
+
+			for (const auto& component : m_Components)
+			{
+				if (auto castedComponent { dynamic_cast<T*>(component.get()) } )
+					return casted;
+			}
+
+			return nullptr;
+
+
+		}
+
+	private:
+		std::vector<std::unique_ptr<BaseComponent*>> m_pComponents{};
 	};
 }
