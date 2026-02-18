@@ -2,7 +2,7 @@
 #include "GameObject.h"
 
 dae::BaseComponent::BaseComponent(GameObject* pOwner):
-	m_pOwner{ pOwner }
+	m_OwnerRPtr{ pOwner }
 {
 }
 

@@ -1,14 +1,16 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "GameObject.h"
 #include "Transform.h"
+#include "BaseComponent.h"
+#include <SDL3_ttf/SDL_ttf.h>
+
 
 namespace dae
 {
 	class Font;
 	class Texture2D;
-	class TextObject final : public GameObject
+	class TextComponent : public BaseComponent
 	{
 	public:
 		void Update(float deltaTime) override;
@@ -18,12 +20,12 @@ namespace dae
 		void SetPosition(float x, float y);
 		void SetColor(const SDL_Color& color);
 
-		TextObject(const std::string& text, std::shared_ptr<Font> font, const SDL_Color& color = { 255, 255, 255, 255 });
-		virtual ~TextObject() = default;
-		TextObject(const TextObject& other) = delete;
-		TextObject(TextObject&& other) = delete;
-		TextObject& operator=(const TextObject& other) = delete;
-		TextObject& operator=(TextObject&& other) = delete;
+		TextComponent(GameObject* owner, const std::string& text, std::shared_ptr<Font> font, const SDL_Color& color = { 255, 255, 255, 255 });
+		virtual ~TextComponent() = default;
+		TextComponent(const TextComponent& other) = delete;
+		TextComponent(TextComponent&& other) = delete;
+		TextComponent& operator=(const TextComponent& other) = delete;
+		TextComponent& operator=(TextComponent&& other) = delete;
 	private:
 		bool m_needsUpdate{};
 		std::string m_text{};

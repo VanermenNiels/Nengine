@@ -1,6 +1,4 @@
 #pragma once
-
-
 namespace dae
 {
 	class GameObject;
@@ -22,6 +20,8 @@ namespace dae
 		virtual void Render() const;
 
 	protected:
-		GameObject* m_pOwner;
+		GameObject* GetOwner() const { return m_OwnerRPtr; }
+	private:
+		GameObject* m_OwnerRPtr;
 	};
 }

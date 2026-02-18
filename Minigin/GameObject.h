@@ -12,7 +12,7 @@ namespace dae
 {
 	class Texture2D;
 
-	class GameObject 
+	class GameObject final
 	{
 	public:
 		virtual void Update(float deltaTime);
