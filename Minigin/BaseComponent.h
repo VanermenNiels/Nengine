@@ -1,21 +1,21 @@
 #pragma once
 
-class GameObject;
 
 namespace dae
 {
-	class Component
+	class GameObject;
+	class BaseComponent
 	{
 	public:
-		Component(GameObject* pOwner);
+		BaseComponent(GameObject* pOwner);
 
-		Component(const Component& other) = delete;
-		Component(Component&& other) = delete;
+		BaseComponent(const BaseComponent& other) = delete;
+		BaseComponent(BaseComponent&& other) = delete;
 
-		Component& operator=(const Component& other) = delete;
-		Component& operator=(Component&& other) = delete;
+		BaseComponent& operator=(const BaseComponent& other) = delete;
+		BaseComponent& operator=(BaseComponent&& other) = delete;
 
-		virtual ~Component() {};
+		virtual ~BaseComponent() {};
 
 		// Will be empty for base class
 		virtual void Update(float deltaTime);

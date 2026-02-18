@@ -1,14 +1,16 @@
 #include "BaseComponent.h"
+#include "GameObject.h"
 
-dae::Component::Component(GameObject* pOwner):
+dae::BaseComponent::BaseComponent(GameObject* pOwner):
 	m_pOwner{ pOwner }
 {
 }
 
-void dae::Component::Update(float deltaTime)
+void dae::BaseComponent::Update(float deltaTime)
 {
+	deltaTime; // Unreferenced parameter
 }
 
-void dae::Component::Render() const
+void dae::BaseComponent::Render() const
 {
 }
