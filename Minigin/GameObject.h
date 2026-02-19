@@ -10,15 +10,12 @@
 
 namespace dae
 {
-	class Texture2D;
-
 	class GameObject final
 	{
 	public:
 		void Update(float deltaTime);
 		void Render() const;
 
-		void SetTexture(const std::string& filename);
 		void SetPosition(float x, float y);
 
 		GameObject() = default;
@@ -29,6 +26,8 @@ namespace dae
 		GameObject& operator=(GameObject&& other) = delete;
 
 		Transform& GetTransform() { return m_transform; }
+		bool GetMarkedForDeletion() const { return m_MarkedForDeletion; }
+
 
 		template<typename ComponentType, typename... Args>
 		ComponentType* AddComponent(Args&&... args)
@@ -134,6 +133,7 @@ namespace dae
 		std::unordered_map<std::type_index, std::vector<BaseComponent*>> m_ComponentRPtrUMap{};
 
 		Transform m_transform{};
-		std::shared_ptr<Texture2D> m_texture{};
+
+		bool m_MarkedForDeletion{};
 	};
 }

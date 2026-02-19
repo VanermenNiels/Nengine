@@ -19,9 +19,13 @@ namespace dae
 		virtual void Update(float deltaTime);
 		virtual void Render() const;
 
+		bool IsEnabled() const { return m_Enabled; }
+		void SetEnabled(bool enabled) { m_Enabled = enabled; }
+
 	protected:
 		GameObject* GetOwner() const { return m_OwnerRPtr; }
 	private:
 		GameObject* m_OwnerRPtr;
+		bool m_Enabled { true };
 	};
 }

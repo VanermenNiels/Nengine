@@ -6,9 +6,8 @@ dae::BaseComponent::BaseComponent(GameObject* pOwner):
 {
 }
 
-void dae::BaseComponent::Update(float deltaTime)
+void dae::BaseComponent::Update(float)
 {
-	deltaTime; // Unreferenced parameter
 }
 
 void dae::BaseComponent::Render() const

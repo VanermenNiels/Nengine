@@ -17,6 +17,10 @@ namespace dae
 		FPSComponent& operator=(FPSComponent&& other) = delete;
 	private:
 		TextComponent* m_TextComponentRPtr;
+
+		float m_TimeBetweenFrames{0.1f};
+		float m_AccumulatedTime{};
+
 		float m_FPS{};
 	};
 }

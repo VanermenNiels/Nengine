@@ -27,6 +27,8 @@ namespace dae
 		explicit Scene() = default;
 
 		std::vector <std::unique_ptr<GameObject>> m_objects{};
+
+		std::vector<GameObject*> m_ObjectsToRemove{};
 	};
 
 }
