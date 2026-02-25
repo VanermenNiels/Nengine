@@ -13,10 +13,6 @@ namespace dae
 	class GameObject final
 	{
 	public:
-		void Update(float deltaTime);
-		void Render() const;
-
-		void SetPosition(float x, float y);
 
 		GameObject() = default;
 		~GameObject();
@@ -25,8 +21,29 @@ namespace dae
 		GameObject& operator=(const GameObject& other) = delete;
 		GameObject& operator=(GameObject&& other) = delete;
 
-		Transform& GetTransform() { return m_transform; }
+		void Update(float deltaTime);
+		void Render() const;
+
+		void SetPosition(float x, float y);
+		void UpdatePosition(float deltaX, float deltaY);
+
+		Transform& GetWorldTransForm() { return m_WorldTransform; }
+
+		void MarkForDeletion() { m_MarkedForDeletion = true; }
 		bool GetMarkedForDeletion() const { return m_MarkedForDeletion; }
+
+		//keeping the option there so people can use it backwards
+		void AddChild(GameObject* child);
+
+		void SetParent(GameObject* newParent, bool keepWorldPosition = true);
+		void SetLocalPosition(const glm::vec3& pos);
+		void SetPositionDirty();
+
+		GameObject* GetParent() const { return m_ParentRPtr; }
+		const glm::vec3& GetWorldPosition();
+		const glm::vec3& GetLocalPosition() const { return m_LocalTransform.GetPosition(); }
+
+		void UpdateWorldPosition();
 
 
 		template<typename ComponentType, typename... Args>
@@ -132,8 +149,17 @@ namespace dae
 		std::vector<std::unique_ptr<BaseComponent>> m_ComponentsUPtrVec{};
 		std::unordered_map<std::type_index, std::vector<BaseComponent*>> m_ComponentRPtrUMap{};
 
-		Transform m_transform{};
+		GameObject* m_ParentRPtr{};
+		std::vector<GameObject*> m_ChildrenRPtrVec{};
+
+		Transform m_WorldTransform{};
+		Transform m_LocalTransform{};
+
+		bool m_PositionDirty{};
 
 		bool m_MarkedForDeletion{};
+
+		bool IsChildOf(const GameObject* potentialParent) const;
+		void RemoveChild(GameObject* child);
 	};
 }

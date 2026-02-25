@@ -35,9 +35,9 @@ static void load()
 	to->SetPosition(292, 20);
 	scene.Add(std::move(to));
 
-	auto fpsGo = std::make_unique<dae::GameObject>();
-	fpsGo->AddComponent<dae::FPSComponent>( fpsGo->AddComponent<dae::TextComponent>(" ", font));
-	scene.Add(std::move(fpsGo));
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::FPSComponent>(go->AddComponent<dae::TextComponent>(" ", font));
+	scene.Add(std::move(go));
 }
 
 int main(int, char*[]) {

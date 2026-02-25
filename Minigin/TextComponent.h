@@ -26,7 +26,10 @@ namespace dae
 		std::string m_text{};
 		SDL_Color m_color{ 255, 255, 255, 255 };
 		std::shared_ptr<Font> m_font{};
-		// We need to manage the texture ourselves since we need to update it when the text or color changes, and we don't want to mess with the ResourceManager for that
+
+		/*We need to manage the texture ourselves since we need to update it when the text or color changes, 
+		  and we don't want to mess with the ResourceManager for that
+		*/ 
 		std::unique_ptr<Texture2D> m_TextTextureUPtr{};
 	};
 }

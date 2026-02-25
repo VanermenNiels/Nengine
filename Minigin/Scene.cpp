@@ -10,16 +10,13 @@ void Scene::Add(std::unique_ptr<GameObject> object)
 	m_objects.emplace_back(std::move(object));
 }
 
-void Scene::Remove(const GameObject& object)
+void Scene::Remove()
 {
-	m_objects.erase(
-		std::remove_if(
-			m_objects.begin(),
-			m_objects.end(),
-			[&object](const auto& ptr) { return ptr.get() == &object; }
-		),
-		m_objects.end()
-	);
+	m_objects.erase( std::remove_if(
+						m_objects.begin(),
+						m_objects.end(),
+						[](const auto& obj){ return obj->GetMarkedForDeletion(); }),
+					m_objects.end() );
 }
 
 void Scene::RemoveAll()
@@ -33,6 +30,8 @@ void Scene::Update(float deltaTime)
 	{
 		object->Update(deltaTime);
 	}
+
+	Remove(); //Remove objects that were marked for deletion during the update
 }
 
 void Scene::Render() const
