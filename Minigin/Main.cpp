@@ -11,6 +11,7 @@
 #include "TextComponent.h"
 #include "Scene.h"
 #include "FPSComponent.h"
+#include "RotateComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -31,13 +32,27 @@ static void load()
 
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 	auto to = std::make_unique<dae::GameObject>();
-	to->AddComponent<dae::TextComponent>("Programming 4 Assignment", font)->SetPosition(250, 20);
+	to->AddComponent<dae::TextComponent>("Programming 4 Assignment", font);
 	to->SetPosition(292, 20);
 	scene.Add(std::move(to));
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::FPSComponent>(go->AddComponent<dae::TextComponent>(" ", font));
 	scene.Add(std::move(go));
+
+	auto child{ std::make_unique<dae::GameObject>() };
+	child->AddComponent<dae::RotateComponent>(10.f, 25.f);
+	child->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+	
+
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+	go->AddComponent<dae::RotateComponent>(-10.f, 50.f)->SetRotationPoint({ 400.f, 300.f, 0.f });
+	child->SetParent(go.get(), false);
+	scene.Add(std::move(go));
+	scene.Add(std::move(child));
+
+	
 }
 
 int main(int, char*[]) {

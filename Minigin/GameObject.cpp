@@ -27,15 +27,6 @@ void dae::GameObject::Render() const
 void dae::GameObject::SetPosition(float x, float y)
 {
 	SetLocalPosition({ x, y, 0.f });
-
-	for (const auto& component : m_ComponentsUPtrVec)
-	{
-		if (component->IsEnabled())
-		{
-			if (auto renderComp{ dynamic_cast<RenderComponent*>(component.get()) })
-				renderComp->SetPosition(x, y);
-		}
-	}
 }
 
 void dae::GameObject::UpdatePosition(float deltaX, float deltaY)

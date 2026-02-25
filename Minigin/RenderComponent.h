@@ -21,7 +21,6 @@ namespace dae
 
 		void Render() const override;
 
-		void SetPosition(float x, float y);
 		void SetTexture(const std::string& filename);
 	protected:
 		Texture2D* m_TextureRPtr{};

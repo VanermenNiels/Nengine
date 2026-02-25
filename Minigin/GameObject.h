@@ -32,9 +32,6 @@ namespace dae
 		void MarkForDeletion() { m_MarkedForDeletion = true; }
 		bool GetMarkedForDeletion() const { return m_MarkedForDeletion; }
 
-		//keeping the option there so people can use it backwards
-		void AddChild(GameObject* child);
-
 		void SetParent(GameObject* newParent, bool keepWorldPosition = true);
 		void SetLocalPosition(const glm::vec3& pos);
 		void SetPositionDirty();
@@ -161,5 +158,7 @@ namespace dae
 
 		bool IsChildOf(const GameObject* potentialParent) const;
 		void RemoveChild(GameObject* child);
+		void AddChild(GameObject* child);
+
 	};
 }
