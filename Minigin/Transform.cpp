@@ -1,20 +1,32 @@
 #include "Transform.h"
 
-void dae::Transform::SetPosition(const float x, const float y, const float z)
+void dae::Transform::SetWorldPosition(const float x, const float y, const float z)
 {
-	m_position.x = x;
-	m_position.y = y;
-	m_position.z = z;
+	m_WorldPosition.x = x;
+	m_WorldPosition.y = y;
+	m_WorldPosition.z = z;
+}
+
+void dae::Transform::SetLocalPosition(float x, float y, float z)
+{
+	m_LocalPosition.x = x;
+	m_LocalPosition.y = y;
+	m_LocalPosition.z = z;
 }
 
 void dae::Transform::UpdatePosition(float deltaX, float deltaY, float deltaZ)
 {
-	m_position.x += deltaX;
-	m_position.y += deltaY;
-	m_position.z += deltaZ;
+	m_WorldPosition.x += deltaX;
+	m_WorldPosition.y += deltaY;
+	m_WorldPosition.z += deltaZ;
 }
 
-void dae::Transform::SetPosition(const glm::vec3& position) 
+void dae::Transform::SetWorldPosition(const glm::vec3& position)
 { 
-	m_position = position; 
+	m_WorldPosition = position; 
+}
+
+void dae::Transform::SetLocalPosition(const glm::vec3& localPosition)
+{
+	m_LocalPosition = localPosition;
 }

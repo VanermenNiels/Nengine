@@ -51,8 +51,6 @@ static void load()
 	child->SetParent(go.get(), false);
 	scene.Add(std::move(go));
 	scene.Add(std::move(child));
-
-	
 }
 
 int main(int, char*[]) {

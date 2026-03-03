@@ -27,18 +27,20 @@ namespace dae
 		void SetPosition(float x, float y);
 		void UpdatePosition(float deltaX, float deltaY);
 
-		Transform& GetWorldTransForm() { return m_WorldTransform; }
+		Transform& GetWorldTransForm() { return m_Transform; }
 
 		void MarkForDeletion() { m_MarkedForDeletion = true; }
 		bool GetMarkedForDeletion() const { return m_MarkedForDeletion; }
 
-		void SetParent(GameObject* newParent, bool keepWorldPosition = true);
+		// we use this method to move ownership if the GameObject already has a parent
+		std::unique_ptr<GameObject> ReleaseChild(GameObject* child);
+		void SetParent(std::unique_ptr<GameObject> self, GameObject* newParent, bool keepWorldPosition = true);
 		void SetLocalPosition(const glm::vec3& pos);
 		void SetPositionDirty();
 
 		GameObject* GetParent() const { return m_ParentRPtr; }
 		const glm::vec3& GetWorldPosition();
-		const glm::vec3& GetLocalPosition() const { return m_LocalTransform.GetPosition(); }
+		//const glm::vec3& GetLocalPosition()  { return m_Transform.GetLocalPosition(); }
 
 		void UpdateWorldPosition();
 
@@ -147,10 +149,9 @@ namespace dae
 		std::unordered_map<std::type_index, std::vector<BaseComponent*>> m_ComponentRPtrUMap{};
 
 		GameObject* m_ParentRPtr{};
-		std::vector<GameObject*> m_ChildrenRPtrVec{};
+		std::vector<std::unique_ptr<GameObject>> m_ChildrenUPtrVec{};
 
-		Transform m_WorldTransform{};
-		Transform m_LocalTransform{};
+		Transform m_Transform{};
 
 		bool m_PositionDirty{};
 
@@ -158,7 +159,7 @@ namespace dae
 
 		bool IsChildOf(const GameObject* potentialParent) const;
 		void RemoveChild(GameObject* child);
-		void AddChild(GameObject* child);
+		void AddChild(std::unique_ptr<GameObject> child);
 
 	};
 }

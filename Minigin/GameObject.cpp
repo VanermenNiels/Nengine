@@ -1,6 +1,6 @@
-#include <string>
 #include "GameObject.h"
 #include "RenderComponent.h"
+#include <string>
 
 dae::GameObject::~GameObject() = default;
 
@@ -31,44 +31,60 @@ void dae::GameObject::SetPosition(float x, float y)
 
 void dae::GameObject::UpdatePosition(float deltaX, float deltaY)
 {
-	auto pos { m_LocalTransform.GetPosition() };
+	auto pos { m_Transform.GetLocalPosition() };
 	pos.x += deltaX;
 	pos.y += deltaY;
 
-	m_LocalTransform.SetPosition(pos);
+	m_Transform.SetLocalPosition(pos);
 	SetPositionDirty();
 }
 
-void dae::GameObject::AddChild(GameObject* child)
+void dae::GameObject::AddChild(std::unique_ptr<GameObject> child)
 {
-	if (!child || child == this || IsChildOf(child))
+	if (!child || child.get() == this || IsChildOf(child.get()))
 		return;
 
 	if (child->m_ParentRPtr)
-		child->m_ParentRPtr->RemoveChild(child);
+		child->m_ParentRPtr->RemoveChild(child.get());
 
 	child->m_ParentRPtr = this;
-	m_ChildrenRPtrVec.push_back(child);
+	m_ChildrenUPtrVec.push_back(std::move(child));
 
 	child->SetPositionDirty();
+}
+
+std::unique_ptr<dae::GameObject> dae::GameObject::ReleaseChild(GameObject* child)
+{
+	auto it = std::find_if(m_ChildrenUPtrVec.begin(),
+						   m_ChildrenUPtrVec.end(),
+						   [child](const std::unique_ptr<GameObject>& ptr)
+						   { return ptr.get() == child;});
+
+	if (it == m_ChildrenUPtrVec.end())
+		return nullptr;
+
+	std::unique_ptr<GameObject> extracted{ std::move(*it) };
+	m_ChildrenUPtrVec.erase(it);
+	extracted->m_ParentRPtr = nullptr;
+	return extracted;
 }
 
 void dae::GameObject::RemoveChild(GameObject* child)
 {
 	if (!child) return;
 
-	auto it { std::remove(m_ChildrenRPtrVec.begin(), m_ChildrenRPtrVec.end(), child) };
-	m_ChildrenRPtrVec.erase(it, m_ChildrenRPtrVec.end());
+	auto it { std::remove(m_ChildrenUPtrVec.begin(), m_ChildrenUPtrVec.end(), child) };
+	m_ChildrenUPtrVec.erase(it, m_ChildrenUPtrVec.end());
 
 	child->m_ParentRPtr = nullptr;
 	child->SetPositionDirty();
 }
 
-void dae::GameObject::SetParent(GameObject* parent, bool keepWorldPos)
+void dae::GameObject::SetParent(std::unique_ptr<GameObject> self, GameObject* parent, bool keepWorldPos)
 {
 	if (IsChildOf(parent) || parent == this || parent == m_ParentRPtr)
 		return;
-	if (!parent) 
+	if (!parent)
 		SetLocalPosition(GetWorldPosition());
 	else
 	{
@@ -77,14 +93,17 @@ void dae::GameObject::SetParent(GameObject* parent, bool keepWorldPos)
 		SetPositionDirty();
 	}
 
-	if (m_ParentRPtr) m_ParentRPtr->RemoveChild(this);
+	if (m_ParentRPtr)
+	{
+		parent->AddChild(std::move(self));
+	}
 	m_ParentRPtr = parent;
-	if (m_ParentRPtr) m_ParentRPtr->AddChild(this);
+	if (m_ParentRPtr) m_ParentRPtr->AddChild(std::move(self));
 }
 
 void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
 {
-	m_LocalTransform.SetPosition(pos);
+	m_Transform.SetLocalPosition(pos);
 	SetPositionDirty();
 }
 
@@ -92,7 +111,7 @@ const glm::vec3& dae::GameObject::GetWorldPosition()
 {
 	if (m_PositionDirty)
 		UpdateWorldPosition();
-	return m_WorldTransform.GetPosition();
+	return m_Transform.GetWorldPosition();
 }
 
 void dae::GameObject::UpdateWorldPosition()
@@ -100,9 +119,9 @@ void dae::GameObject::UpdateWorldPosition()
 	if (m_PositionDirty)
 	{
 		if(!m_ParentRPtr)
-			m_WorldTransform.SetPosition(m_LocalTransform.GetPosition());
+			m_Transform.SetWorldPosition(m_Transform.GetLocalPosition());
 		else
-			m_WorldTransform.SetPosition(m_LocalTransform.GetPosition() + m_ParentRPtr->GetWorldPosition());
+			m_Transform.SetWorldPosition(m_Transform.GetLocalPosition() + m_ParentRPtr->GetWorldPosition());
 	}
 	m_PositionDirty = false;
 }
@@ -110,17 +129,19 @@ void dae::GameObject::UpdateWorldPosition()
 void dae::GameObject::SetPositionDirty()
 {
 	m_PositionDirty = true;
-	for (auto child : m_ChildrenRPtrVec)
+	for (const auto& child : m_ChildrenUPtrVec)
+	{
 		child->SetPositionDirty();
+	}
 }
 
 bool dae::GameObject::IsChildOf(const GameObject* potentialParent) const
 {
 	if (!potentialParent) return false;
 
-	for (auto child : m_ChildrenRPtrVec)
+	for (const auto& child : m_ChildrenUPtrVec)
 	{
-		if (child == potentialParent || child->IsChildOf(potentialParent))
+		if (child.get() == potentialParent || child->IsChildOf(potentialParent))
 			return true;
 	}
 	return false;
