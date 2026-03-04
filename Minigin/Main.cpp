@@ -12,6 +12,7 @@
 #include "Scene.h"
 #include "FPSComponent.h"
 #include "RotateComponent.h"
+#include "TrashTheCasheComponent.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -59,6 +60,10 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	go->SetPosition(300, 400);
 	childRPtr->SetParent(go.get(), false);
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::TrashTheCasheComponent>();
 	scene.Add(std::move(go));
 }
 
