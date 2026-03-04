@@ -31,7 +31,7 @@ static void load()
 	scene.Add(std::move(go));
 
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-	auto to = std::make_unique<dae::GameObject>();
+	auto to = std::make_unique<dae::GameObject>(); 
 	to->AddComponent<dae::TextComponent>("Programming 4 Assignment", font);
 	to->SetPosition(292, 20);
 	scene.Add(std::move(to));
