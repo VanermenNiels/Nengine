@@ -28,7 +28,8 @@ void Scene::Update(float deltaTime)
 {
 	for(auto& object : m_objects)
 	{
-		object->Update(deltaTime);
+		if (!object->GetParent()) // Only update root objects, as children will be updated by their parents
+			object->Update(deltaTime);
 	}
 
 	Remove(); //Remove objects that were marked for deletion during the update
@@ -38,7 +39,8 @@ void Scene::Render() const
 {
 	for (const auto& object : m_objects)
 	{
-		object->Render();
+		if (!object->GetParent()) // Only update root objects, as children will be updated by their parents
+			object->Render();
 	}
 }
 

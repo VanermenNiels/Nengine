@@ -12,6 +12,11 @@ void dae::GameObject::Update(float deltaTime)
 		if (component->IsEnabled()) 
 			component->Update(deltaTime);
 	}
+
+	for (const auto child : m_ChildrenRPtrVec)
+	{
+		child->Update(deltaTime);
+	}
 		
 }
 
@@ -22,6 +27,11 @@ void dae::GameObject::Render() const
 		if (component->IsEnabled())
 			component->Render();
 	}
+
+	for (const auto child : m_ChildrenRPtrVec)
+	{
+		child->Render();
+	}
 }
 
 void dae::GameObject::SetPosition(float x, float y)
@@ -31,11 +41,11 @@ void dae::GameObject::SetPosition(float x, float y)
 
 void dae::GameObject::UpdatePosition(float deltaX, float deltaY)
 {
-	auto pos { m_LocalTransform.GetPosition() };
+	auto pos { m_Transform.GetLocalPosition() };
 	pos.x += deltaX;
 	pos.y += deltaY;
 
-	m_LocalTransform.SetPosition(pos);
+	m_Transform.SetLocalPosition(pos);
 	SetPositionDirty();
 }
 
@@ -64,6 +74,14 @@ void dae::GameObject::RemoveChild(GameObject* child)
 	child->SetPositionDirty();
 }
 
+void dae::GameObject::MarkForDeletion()
+{
+	m_MarkedForDeletion = true;
+
+	for (const auto child : m_ChildrenRPtrVec)
+		child->MarkForDeletion();
+}
+
 void dae::GameObject::SetParent(GameObject* parent, bool keepWorldPos)
 {
 	if (IsChildOf(parent) || parent == this || parent == m_ParentRPtr)
@@ -84,7 +102,7 @@ void dae::GameObject::SetParent(GameObject* parent, bool keepWorldPos)
 
 void dae::GameObject::SetLocalPosition(const glm::vec3& pos)
 {
-	m_LocalTransform.SetPosition(pos);
+	m_Transform.SetLocalPosition(pos);
 	SetPositionDirty();
 }
 
@@ -92,7 +110,7 @@ const glm::vec3& dae::GameObject::GetWorldPosition()
 {
 	if (m_PositionDirty)
 		UpdateWorldPosition();
-	return m_WorldTransform.GetPosition();
+	return m_Transform.GetWorldPosition();
 }
 
 void dae::GameObject::UpdateWorldPosition()
@@ -100,9 +118,9 @@ void dae::GameObject::UpdateWorldPosition()
 	if (m_PositionDirty)
 	{
 		if(!m_ParentRPtr)
-			m_WorldTransform.SetPosition(m_LocalTransform.GetPosition());
+			m_Transform.SetWorldPosition(m_Transform.GetLocalPosition());
 		else
-			m_WorldTransform.SetPosition(m_LocalTransform.GetPosition() + m_ParentRPtr->GetWorldPosition());
+			m_Transform.SetWorldPosition(m_Transform.GetLocalPosition() + m_ParentRPtr->GetWorldPosition());
 	}
 	m_PositionDirty = false;
 }

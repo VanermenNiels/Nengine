@@ -27,9 +27,9 @@ namespace dae
 		void SetPosition(float x, float y);
 		void UpdatePosition(float deltaX, float deltaY);
 
-		Transform& GetWorldTransForm() { return m_WorldTransform; }
+		Transform& GetWorldTransForm() { return m_Transform; }
 
-		void MarkForDeletion() { m_MarkedForDeletion = true; }
+		void MarkForDeletion();
 		bool GetMarkedForDeletion() const { return m_MarkedForDeletion; }
 
 		void SetParent(GameObject* newParent, bool keepWorldPosition = true);
@@ -38,7 +38,7 @@ namespace dae
 
 		GameObject* GetParent() const { return m_ParentRPtr; }
 		const glm::vec3& GetWorldPosition();
-		const glm::vec3& GetLocalPosition() const { return m_LocalTransform.GetPosition(); }
+		const glm::vec3& GetLocalPosition() const { return m_Transform.GetLocalPosition(); }
 
 		void UpdateWorldPosition();
 
@@ -149,8 +149,7 @@ namespace dae
 		GameObject* m_ParentRPtr{};
 		std::vector<GameObject*> m_ChildrenRPtrVec{};
 
-		Transform m_WorldTransform{};
-		Transform m_LocalTransform{};
+		Transform m_Transform{};
 
 		bool m_PositionDirty{};
 
