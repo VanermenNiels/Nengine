@@ -19,7 +19,7 @@ namespace dae
 		virtual ~RotateComponent() = default;
 		virtual void Update(float deltaTime) override;
 
-		void SetRotationPoint(glm::vec3 rotationPoint) { m_RotationPoint = rotationPoint; }
+		//void SetRotationPoint(glm::vec3 rotationPoint) { m_RotationPoint = rotationPoint; }
 	private:
 		float m_Speed;
 		float m_Radius;
@@ -27,6 +27,6 @@ namespace dae
 
 		float m_PI{ static_cast<float>(std::numbers::pi) };
 
-		glm::vec3 m_RotationPoint{};
+		//glm::vec3 m_RotationPoint{};
 	};
 }

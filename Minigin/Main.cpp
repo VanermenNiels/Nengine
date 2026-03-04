@@ -40,19 +40,26 @@ static void load()
 	go->AddComponent<dae::FPSComponent>(go->AddComponent<dae::TextComponent>(" ", font));
 	scene.Add(std::move(go));
 
-	auto child{ std::make_unique<dae::GameObject>() };
-	child->AddComponent<dae::RotateComponent>(10.f, 25.f);
-	child->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
-	
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::RotateComponent>(10.f, 25.f);
+	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+
+	auto childRPtr { go.get() };
+	scene.Add(std::move(go));
+
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
-	go->AddComponent<dae::RotateComponent>(-10.f, 50.f)->SetRotationPoint({ 400.f, 300.f, 0.f });
-	child->SetParent(go.get(), false);
-	scene.Add(std::move(go));
-	scene.Add(std::move(child));
+	go->AddComponent<dae::RotateComponent>(-10.f, 50.f);
+	childRPtr->SetParent(go.get(), false);
 
-	
+	childRPtr = go.get() ;
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	go->SetPosition(300, 400);
+	childRPtr->SetParent(go.get(), false);
+	scene.Add(std::move(go));
 }
 
 int main(int, char*[]) {
