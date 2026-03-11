@@ -13,13 +13,18 @@
 #include "FPSComponent.h"
 #include "RotateComponent.h"
 #include "TrashTheCasheComponent.h"
+#include "InputManager.h"
+#include "Commands/MoveCommand.h"
 
 #include <filesystem>
+#include <SDL3/SDL_oldnames.h>
 namespace fs = std::filesystem;
 
 static void load()
 {
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
+
+	auto& inputManager { dae::InputManager::GetInstance() };
 
 	auto go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("background.png");
@@ -42,29 +47,22 @@ static void load()
 	scene.Add(std::move(go));
 
 	go = std::make_unique<dae::GameObject>();
-	go->AddComponent<dae::RotateComponent>(10.f, 25.f);
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
 
-	auto childRPtr { go.get() };
-	scene.Add(std::move(go));
-
+	inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f, 0.f }, 5.f));
+	inputManager.BindKeyboardCommand(SDLK_A, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 5.f));
+	inputManager.BindKeyboardCommand(SDLK_S, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, 1.f, 0.f }, 5.f));
+	inputManager.BindKeyboardCommand(SDLK_W, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, -1.f, 0.f }, 5.f));
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
-	go->AddComponent<dae::RotateComponent>(-10.f, 50.f);
-	childRPtr->SetParent(go.get(), false);
 
-	childRPtr = go.get() ;
+
 	scene.Add(std::move(go));
 
-	go = std::make_unique<dae::GameObject>();
-	go->SetPosition(300, 400);
-	childRPtr->SetParent(go.get(), false);
-	scene.Add(std::move(go));
-
-	go = std::make_unique<dae::GameObject>();
+	/*go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::TrashTheCasheComponent>();
-	scene.Add(std::move(go));
+	scene.Add(std::move(go))*/;
 }
 
 int main(int, char*[]) {

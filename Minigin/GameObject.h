@@ -155,6 +155,8 @@ namespace dae
 
 		bool m_MarkedForDeletion{};
 
+		float m_DeltaTime{};
+
 		bool IsChildOf(const GameObject* potentialParent) const;
 		void RemoveChild(GameObject* child);
 		void AddChild(GameObject* child);
