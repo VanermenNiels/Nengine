@@ -10,6 +10,12 @@ namespace dae
     public:
         ControllerInput(unsigned int controllerIndex);
 
+        ControllerInput(const ControllerInput&) = default;
+        ControllerInput& operator=(const ControllerInput&) = default;
+
+        ControllerInput(ControllerInput&&) noexcept = default;
+        ControllerInput& operator=(ControllerInput&&) noexcept = default;
+
         void Update();
 
         bool IsConnected() const;

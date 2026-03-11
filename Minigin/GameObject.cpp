@@ -6,7 +6,6 @@ dae::GameObject::~GameObject() = default;
 
 void dae::GameObject::Update(float deltaTime) 
 {
-	m_DeltaTime = deltaTime;
 	// Update components
 	for (const auto& component : m_ComponentsUPtrVec)
 	{
@@ -43,8 +42,8 @@ void dae::GameObject::SetPosition(float x, float y)
 void dae::GameObject::UpdatePosition(float deltaX, float deltaY)
 {
 	auto pos{ m_Transform.GetLocalPosition() };
-	pos.x += deltaX * m_DeltaTime;
-	pos.y += deltaY * m_DeltaTime;
+	pos.x += deltaX ;
+	pos.y += deltaY;
 
 	SetLocalPosition(pos);
 }

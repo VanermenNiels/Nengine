@@ -8,7 +8,7 @@ dae::InputManager::InputManager()
     const int maxControllers = 4;
 
     m_Controllers.reserve(maxControllers);
-    m_ControllerBindings.resize(maxControllers);
+    //m_ControllerBindings.resize(maxControllers);
 
     for (unsigned int i = 0; i < maxControllers; ++i)
         m_Controllers.emplace_back(i);
@@ -38,13 +38,7 @@ bool dae::InputManager::ProcessInput()
     {
         m_Controllers[i].Update();
 
-        for (auto& [button, command] : m_ControllerBindings[i])
-        {
-            if (command && m_Controllers[i].IsDown(button))
-            {
-                command->Execute();
-            }
-        }
+        
     }
 
     return true;
@@ -52,7 +46,8 @@ bool dae::InputManager::ProcessInput()
 
 void dae::InputManager::BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command)
 {
-    m_KeyBindings[key] = std::move(command);
+    m_KeyBindings.emplace( key, std::move(command));
+
 }
 
 void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
@@ -60,14 +55,4 @@ void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
     m_KeyBindings.erase(key);
 }
 
-void dae::InputManager::BindControllerCommand(unsigned int controllerIndex, WORD button, std::unique_ptr<Command> command)
-{
-    if (controllerIndex < m_ControllerBindings.size())
-        m_ControllerBindings[controllerIndex][button] = std::move(command);
-}
 
-void dae::InputManager::UnBindControllerCommand(unsigned int controllerIndex, WORD button)
-{
-    if (controllerIndex < m_ControllerBindings.size())
-        m_ControllerBindings[controllerIndex].erase(button);
-}

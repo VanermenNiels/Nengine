@@ -10,14 +10,10 @@
 #include "ResourceManager.h"
 #include "TextComponent.h"
 #include "Scene.h"
-#include "FPSComponent.h"
-#include "RotateComponent.h"
-#include "TrashTheCasheComponent.h"
 #include "InputManager.h"
 #include "Commands/MoveCommand.h"
 
 #include <filesystem>
-#include <SDL3/SDL_oldnames.h>
 namespace fs = std::filesystem;
 
 static void load()
@@ -42,27 +38,27 @@ static void load()
 	to->SetPosition(292, 20);
 	scene.Add(std::move(to));
 
+
 	go = std::make_unique<dae::GameObject>();
-	go->AddComponent<dae::FPSComponent>(go->AddComponent<dae::TextComponent>(" ", font));
+	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+
+	auto right = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f, 0.f }, 5.f);
+	auto left = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 5.f);
+	auto down = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, 1.f, 0.f }, 5.f);
+	auto up = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, -1.f, 0.f }, 5.f);
+
+	inputManager.BindKeyboardCommand(SDLK_D, std::move(right));
+	inputManager.BindKeyboardCommand(SDLK_A, std::move(left));
+	inputManager.BindKeyboardCommand(SDLK_S, std::move(down));
+	inputManager.BindKeyboardCommand(SDLK_W, std::move(up));
+
 	scene.Add(std::move(go));
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
 
-	inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f, 0.f }, 5.f));
-	inputManager.BindKeyboardCommand(SDLK_A, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 5.f));
-	inputManager.BindKeyboardCommand(SDLK_S, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, 1.f, 0.f }, 5.f));
-	inputManager.BindKeyboardCommand(SDLK_W, std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, -1.f, 0.f }, 5.f));
-
-	go = std::make_unique<dae::GameObject>();
-	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
-
 
 	scene.Add(std::move(go));
-
-	/*go = std::make_unique<dae::GameObject>();
-	go->AddComponent<dae::TrashTheCasheComponent>();
-	scene.Add(std::move(go))*/;
 }
 
 int main(int, char*[]) {

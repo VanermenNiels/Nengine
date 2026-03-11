@@ -154,6 +154,10 @@ target_link_libraries(${TARGET_NAME} PUBLIC
     ${VLD_LIBRARIES}
 )
 
+if(WIN32)
+  target_link_libraries("${TARGET_NAME}" PUBLIC xinput)
+endif()
+
 # -----------------------
 # Copy DLLs after build
 # -----------------------
