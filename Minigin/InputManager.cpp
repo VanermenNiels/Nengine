@@ -17,28 +17,28 @@ dae::InputManager::InputManager()
 bool dae::InputManager::ProcessInput()
 {
     SDL_Event e;
-    while (SDL_PollEvent(&e)) 
+
+    while (SDL_PollEvent(&e))
     {
-        if (e.type == SDL_EVENT_QUIT) {
+        if (e.type == SDL_EVENT_QUIT)
             return false;
-        }
-
-        if (e.type == SDL_EVENT_KEY_DOWN) 
-        {
-            auto target { m_KeyBindings.find(e.key.key) };
-
-            if (target != m_KeyBindings.end() && target->second)
-                target->second->Execute();
-        }
 
         ImGui_ImplSDL3_ProcessEvent(&e);
+    }
+
+    const bool* keyboardState = SDL_GetKeyboardState(nullptr);
+
+    for (auto& [key, command] : m_KeyBindings)
+    {
+        if (keyboardState[SDL_GetScancodeFromKey(key, SDL_KMOD_NONE)])
+        {
+            command->Execute();
+        }
     }
 
     for (size_t i{}; i < m_Controllers.size(); ++i)
     {
         m_Controllers[i].Update();
-
-        
     }
 
     return true;
