@@ -15,7 +15,7 @@ namespace dae
 
 		virtual ~Command() = default;
 
-		virtual void Execute() = 0;
+		virtual void Execute(float deltaTime) = 0;
 		void SetTargetGO(GameObject* newTarget) { m_TargetGameObjectRPtr = newTarget; }
 	protected:
 		GameObject* m_TargetGameObjectRPtr;

@@ -9,7 +9,8 @@ dae::MoveCommand::MoveCommand(GameObject* target, glm::vec3 dir, float speed):
 
 }
 
-void dae::MoveCommand::Execute()
+void dae::MoveCommand::Execute(float deltaTime)
 {
-	m_TargetGameObjectRPtr->UpdatePosition(m_Direction.x * m_Speed, m_Direction.y * m_Speed);
+	m_TargetGameObjectRPtr->UpdatePosition((m_Direction.x * m_Speed * deltaTime), 
+										   (m_Direction.y * m_Speed * deltaTime));
 }

@@ -17,7 +17,7 @@ namespace dae
 
 		~MoveCommand() override = default;
 
-		void Execute() override;
+		void Execute(float deltaTime) override;
 
 		void SetDirection(const glm::vec3& newDir) { m_Direction = newDir; }
 		void SetSpeed(float newSpeed) { m_Speed = newSpeed; }

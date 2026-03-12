@@ -12,6 +12,8 @@
 #include "Scene.h"
 #include "InputManager.h"
 #include "Commands/MoveCommand.h"
+#include <Xinput.h>
+
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -21,6 +23,8 @@ static void load()
 	auto& scene = dae::SceneManager::GetInstance().CreateScene();
 
 	auto& inputManager { dae::InputManager::GetInstance() };
+
+	inputManager.InitializeControllers();
 
 	auto go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("background.png");
@@ -42,10 +46,10 @@ static void load()
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
 
-	auto right = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f, 0.f }, 5.f);
-	auto left = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 5.f);
-	auto down = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, 1.f, 0.f }, 5.f);
-	auto up = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, -1.f, 0.f }, 5.f);
+	auto right = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f , 0.f }, 200.f);
+	auto left  = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 200.f);
+	auto down  = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, 1.f , 0.f }, 200.f);
+	auto up    = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, -1.f, 0.f }, 200.f);
 
 	inputManager.BindKeyboardCommand(SDLK_D, std::move(right));
 	inputManager.BindKeyboardCommand(SDLK_A, std::move(left));
@@ -53,10 +57,20 @@ static void load()
 	inputManager.BindKeyboardCommand(SDLK_W, std::move(up));
 
 	scene.Add(std::move(go));
+	
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
 
+	right = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f , 0.f }, 200.f);
+	left  = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 200.f);
+	down  = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, 1.f , 0.f }, 200.f);
+	up    = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 0.f, -1.f, 0.f }, 200.f);
+
+	inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_RIGHT, std::move(right));
+	inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_LEFT , std::move(left));
+	inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_DOWN , std::move(down));
+	inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_UP   , std::move(up));
 
 	scene.Add(std::move(go));
 }

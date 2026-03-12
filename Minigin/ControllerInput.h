@@ -1,7 +1,6 @@
 #pragma once
 #include <windows.h>
 #include <Xinput.h>
-#include <array>
 
 namespace dae
 {
