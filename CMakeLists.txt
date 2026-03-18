@@ -40,8 +40,11 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
     Minigin/TrashTheCasheComponent.cpp
     Minigin/ControllerInput.cpp
     Minigin/HealthComponent.cpp
+    Minigin/ScoreComponent.cpp
     Minigin/Commands/Command.cpp
-    Minigin/Commands/MoveCommand.cpp)
+    Minigin/Commands/MoveCommand.cpp
+    Minigin/Observers/Observer.cpp
+    Minigin/Events/Event.cpp)
 
 # -----------------------
 # FetchContent
