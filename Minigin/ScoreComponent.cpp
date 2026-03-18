@@ -1,17 +1,23 @@
 #include "ScoreComponent.h"
-#include "TextComponent.h"
-#include <sstream>
 
-dae::ScoreComponent::ScoreComponent(GameObject* owner, TextComponent* text, int score):
+dae::ScoreComponent::ScoreComponent(GameObject* owner, int score):
 	BaseComponent(owner),
-	m_TextComponentRPtr{ text },
 	m_Score { score }
 {
 }
 
-void dae::ScoreComponent::Update(float)
+void dae::ScoreComponent::AddScore(int scoreToAdd)
 {
-	std::stringstream ss;
-	ss << std::fixed << "Score: " << m_Score;
-	m_TextComponentRPtr->SetText(ss.str());
+	m_Score += scoreToAdd;
+
+	if (m_SubjectRPtr)
+		m_SubjectRPtr->Notify(GetOwner(), Event{ make_sdbm_hash("ScoreChanged") });
+}
+
+void dae::ScoreComponent::onNotify(GameObject*, Event event)
+{
+	if (event.id == make_sdbm_hash("AddScore"))
+	{
+		AddScore(10);
+	}
 }

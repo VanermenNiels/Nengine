@@ -43,8 +43,10 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
     Minigin/ScoreComponent.cpp
     Minigin/Commands/Command.cpp
     Minigin/Commands/MoveCommand.cpp
-    Minigin/Commands/AddScoreCommand.cpp
+    Minigin/Commands/EventCommand.cpp
     Minigin/Observers/Observer.cpp
+    Minigin/Observers/ScoreDisplay.cpp
+    Minigin/Events/Subject.cpp
     Minigin/Events/Event.cpp)
 
 # -----------------------
