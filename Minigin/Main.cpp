@@ -9,6 +9,8 @@
 #include "SceneManager.h"
 #include "ResourceManager.h"
 #include "TextComponent.h"
+#include "FPSComponent.h"
+#include "ScoreComponent.h"
 #include "Scene.h"
 #include "InputManager.h"
 #include "Commands/MoveCommand.h"
@@ -36,15 +38,40 @@ static void load()
 	go->SetPosition(358, 180);
 	scene.Add(std::move(go));
 
+
 	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
 	auto to = std::make_unique<dae::GameObject>(); 
 	to->AddComponent<dae::TextComponent>("Programming 4 Assignment", font);
 	to->SetPosition(292, 20);
 	scene.Add(std::move(to));
 
+	// Explanation
+	auto font2 = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 20);
+
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::TextComponent>("Use the D-Pad to move Pengo, X to inflict damage, A and B to pick up pellets", font2);
+	go->SetPosition(0, 140);
+	scene.Add(std::move(go));
+
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::TextComponent>("Use the D-Pad to move Pengo, X to inflict damage, A and B to pick up pellets", font2);
+	go->SetPosition(0, 165);
+	scene.Add(std::move(go));
+
+	//Player scores
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::ScoreComponent>(go->AddComponent<dae::TextComponent>(" ", font2));
+	go->SetPosition(0, 200);
+	scene.Add(std::move(go));
+
+	// Players
+	go = std::make_unique<dae::GameObject>();
+	go->AddComponent<dae::FPSComponent>(go->AddComponent<dae::TextComponent>(" ", font));
+	scene.Add(std::move(go));
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+	go->SetPosition(275, 300);
 
 	auto right = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f , 0.f }, 200.f);
 	auto left  = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 200.f);
@@ -57,10 +84,11 @@ static void load()
 	inputManager.BindKeyboardCommand(SDLK_W, std::move(up));
 
 	scene.Add(std::move(go));
-	
+
 
 	go = std::make_unique<dae::GameObject>();
 	go->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+	go->SetPosition(250, 300);
 
 	right = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ 1.f, 0.f , 0.f }, 200.f);
 	left  = std::make_unique<dae::MoveCommand>(go.get(), glm::vec3{ -1.f, 0.f, 0.f }, 200.f);

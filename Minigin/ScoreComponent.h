@@ -1,10 +1,11 @@
 #pragma once
 #include "BaseComponent.h"
-class GameObject;
-class TextComponent;
 
 namespace dae
 {
+	class GameObject;
+	class TextComponent;
+
 	class ScoreComponent final : public BaseComponent
 	{
 	public:

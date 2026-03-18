@@ -1,7 +1,6 @@
 #include "ScoreComponent.h"
 #include "TextComponent.h"
 #include <sstream>
-#include <iomanip>
 
 dae::ScoreComponent::ScoreComponent(GameObject* owner, TextComponent* text, int score):
 	BaseComponent(owner),
@@ -10,7 +9,7 @@ dae::ScoreComponent::ScoreComponent(GameObject* owner, TextComponent* text, int 
 {
 }
 
-void dae::ScoreComponent::Update(float deltaTime)
+void dae::ScoreComponent::Update(float)
 {
 	std::stringstream ss;
 	ss << std::fixed << "Score: " << m_Score;
