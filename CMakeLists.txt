@@ -39,6 +39,7 @@ add_executable(${TARGET_NAME} ${TARGET_PARAM}
     Minigin/RotateComponent.cpp
     Minigin/TrashTheCasheComponent.cpp
     Minigin/ControllerInput.cpp
+    Minigin/HealthComponent.cpp
     Minigin/Commands/Command.cpp
     Minigin/Commands/MoveCommand.cpp)
 
