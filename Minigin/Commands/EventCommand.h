@@ -12,7 +12,7 @@ namespace dae
 
 		void Execute(float) override;
 	private:
-		Subject* m_pSubject{};
+		Subject* m_SubjectRPtr{};
 		unsigned int m_EventId{};
 	};
 }

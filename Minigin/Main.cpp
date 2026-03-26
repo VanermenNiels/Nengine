@@ -55,6 +55,11 @@ static void load()
     titleGO->SetPosition(292, 20);
     scene.Add(std::move(titleGO));
 
+    // --- FPS ---
+    auto FPS = std::make_unique<dae::GameObject>();
+    FPS->AddComponent<dae::FPSComponent>(FPS->AddComponent<dae::TextComponent>(" ", titleFont));
+    scene.Add(std::move(FPS));
+
     // --- INSTRUCTIONS ---
     auto instr = std::make_unique<dae::GameObject>();
     instr->AddComponent<dae::TextComponent>("Use D-Pad to move Pengo, X to inflict damage, A and B to pick up pellets", fontSmall);

@@ -1,6 +1,6 @@
 #pragma once
 #include <windows.h>
-#include <Xinput.h>
+#include <memory>
 
 namespace dae
 {
@@ -9,11 +9,13 @@ namespace dae
     public:
         ControllerInput(unsigned int controllerIndex);
 
+        ~ControllerInput();
+
         ControllerInput(const ControllerInput&) = default;
         ControllerInput& operator=(const ControllerInput&) = default;
 
-        ControllerInput(ControllerInput&&) noexcept = default;
-        ControllerInput& operator=(ControllerInput&&) noexcept = default;
+        ControllerInput(ControllerInput&&) noexcept;
+        ControllerInput& operator=(ControllerInput&&) noexcept;
 
         void Update();
 
@@ -25,8 +27,7 @@ namespace dae
         bool IsDown(WORD button) const;
 
     private:
-        unsigned int m_Index;
-        XINPUT_STATE m_State{};
-        XINPUT_STATE m_LastState{};
+        struct Impl;
+        std::unique_ptr<Impl> m_ControllerInput;
 	};
 }

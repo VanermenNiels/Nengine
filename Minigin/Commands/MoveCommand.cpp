@@ -4,9 +4,9 @@
 dae::MoveCommand::MoveCommand(GameObject* target, glm::vec3 dir, float speed):
 	Command(target),
 	m_Speed { speed },
-	m_Direction { dir }
+	m_Direction {}
 {
-
+	m_Direction = glm::normalize(dir);
 }
 
 void dae::MoveCommand::Execute(float deltaTime)
