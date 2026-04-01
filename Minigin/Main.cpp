@@ -107,15 +107,15 @@ static void load()
     subject1->AddObserver(healthDisplay1);
 
     // Movement bindings
-    inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 1,0,0 }, 200.f));
-    inputManager.BindKeyboardCommand(SDLK_A, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ -1,0,0 }, 200.f));
-    inputManager.BindKeyboardCommand(SDLK_S, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 0,1,0 }, 200.f));
-    inputManager.BindKeyboardCommand(SDLK_W, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 0,-1,0 }, 200.f));
+    inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 1,0,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindKeyboardCommand(SDLK_A, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ -1,0,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindKeyboardCommand(SDLK_S, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 0,1,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindKeyboardCommand(SDLK_W, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 0,-1,0 }, 200.f), dae::InputManager::InputType::Down);
 
     // Event bindings
-    inputManager.BindKeyboardCommand(SDLK_Z, std::make_unique<dae::EventCommand>(player1.get(), subject1, SCORE_EVENT));
-    inputManager.BindKeyboardCommand(SDLK_X, std::make_unique<dae::EventCommand>(player1.get(), subject1, SCORE_EVENT));
-    inputManager.BindKeyboardCommand(SDLK_C, std::make_unique<dae::EventCommand>(player1.get(), subject1, DAMAGE_EVENT));
+    inputManager.BindKeyboardCommand(SDLK_Z, std::make_unique<dae::EventCommand>(player1.get(), subject1, SCORE_EVENT), dae::InputManager::InputType::Pressed);
+    inputManager.BindKeyboardCommand(SDLK_X, std::make_unique<dae::EventCommand>(player1.get(), subject1, SCORE_EVENT), dae::InputManager::InputType::Pressed);
+    inputManager.BindKeyboardCommand(SDLK_C, std::make_unique<dae::EventCommand>(player1.get(), subject1, DAMAGE_EVENT), dae::InputManager::InputType::Pressed);
 
     scene.Add(std::move(player1));
 
@@ -155,15 +155,15 @@ static void load()
     subject2->AddObserver(healthDisplay2);
 
     // Controller movement bindings
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_RIGHT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 1,0,0 }, 200.f));
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_LEFT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ -1,0,0 }, 200.f));
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_DOWN, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,1,0 }, 200.f));
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_UP, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,-1,0 }, 200.f));
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_RIGHT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 1,0,0 }, 200.f),  dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_LEFT,  std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ -1,0,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_DOWN,  std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,1,0 }, 200.f),  dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_UP,    std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,-1,0 }, 200.f), dae::InputManager::InputType::Down);
 
     // Controller event bindings
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_A, std::make_unique<dae::EventCommand>(player2.get(), subject2, SCORE_EVENT));
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_B, std::make_unique<dae::EventCommand>(player2.get(), subject2, SCORE_EVENT));
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_X, std::make_unique<dae::EventCommand>(player2.get(), subject2, DAMAGE_EVENT));
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_A, std::make_unique<dae::EventCommand>(player2.get(), subject2, SCORE_EVENT),  dae::InputManager::InputType::Pressed);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_B, std::make_unique<dae::EventCommand>(player2.get(), subject2, SCORE_EVENT),  dae::InputManager::InputType::Pressed);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_X, std::make_unique<dae::EventCommand>(player2.get(), subject2, DAMAGE_EVENT), dae::InputManager::InputType::Pressed);
 
     scene.Add(std::move(player2));
 }
