@@ -1,18 +1,19 @@
 #pragma once
 #include "Command.h"
 #include "Events/Event.h"
-#include "Events/Subject.h"
+#include "Observers/Observer.h"
 
 namespace dae
 {
 	class EventCommand final : public Command
 	{
 	public:
-		EventCommand(GameObject* target, Subject* subject, unsigned int eventId);
+		EventCommand(GameObject* target, Observer* observer, unsigned int eventId, int value = 0);
 
 		void Execute(float) override;
 	private:
-		Subject* m_SubjectRPtr{};
+		Observer* m_ObserverRPtr{};
 		unsigned int m_EventId{};
+		int          m_Value{};
 	};
 }

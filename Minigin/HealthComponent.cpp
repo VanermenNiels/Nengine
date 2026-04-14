@@ -1,9 +1,10 @@
 #include "HealthComponent.h"
 
-dae::HealthComponent::HealthComponent(GameObject* owner, int health):
+dae::HealthComponent::HealthComponent(GameObject* owner, int health, std::vector<EventId> reactsTo):
 	BaseComponent(owner),
 	m_Health{health},
-	m_MaxHealth{health}
+	m_MaxHealth{health},
+	m_ReactsTo{ std::move(reactsTo) }
 {
 }
 
@@ -14,18 +15,18 @@ void dae::HealthComponent::AlterHealth(int alterAmount)
 	if (m_Health > m_MaxHealth)
 		m_Health = m_MaxHealth;
 
-	if (m_SubjectRPtr)
-		m_SubjectRPtr->Notify(GetOwner(), Event{ dae::make_sdbm_hash("HealthChanged") });
+	m_Subject.Notify(GetOwner(), Event{ dae::make_sdbm_hash("HealthChanged") });
 }
 
 void dae::HealthComponent::onNotify(GameObject*, Event event)
 {
-	if (event.id == make_sdbm_hash("Damage"))
+	if (m_ReactsTo.empty()) return;
+	const int amount { (event.nbArgs > 0) ? event.args[0].intVal : 1 };
+
+	for (const auto& reactEvent : m_ReactsTo)
 	{
-		AlterHealth(-1);
+		if (event.id == reactEvent)
+			AlterHealth(amount);
 	}
-	else if (event.id == make_sdbm_hash("Heal"))
-	{
-		AlterHealth(1);
-	}
+
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 namespace dae
 {
 	class GameObject;
@@ -22,10 +23,14 @@ namespace dae
 		bool IsEnabled() const { return m_Enabled; }
 		void SetEnabled(bool enabled) { m_Enabled = enabled; }
 
+		uint32_t GetOwnerTag() const { return m_OwnerTag; }
+
 	protected:
 		GameObject* GetOwner() const { return m_OwnerRPtr; }
 	private:
 		GameObject* m_OwnerRPtr;
+		const uint32_t m_OwnerTag;
+
 		bool m_Enabled { true };
 	};
 }

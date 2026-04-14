@@ -42,6 +42,9 @@ namespace dae
 
 		void UpdateWorldPosition();
 
+		void SetTag(uint32_t tag) { m_Tag = tag; }
+		uint32_t GetTag() const { return m_Tag; }
+		bool HasTag(uint32_t tag) const { return (m_Tag & tag) != 0; }
 
 		template<typename ComponentType, typename... Args>
 		ComponentType* AddComponent(Args&&... args)
@@ -150,12 +153,11 @@ namespace dae
 		std::vector<GameObject*> m_ChildrenRPtrVec{};
 
 		Transform m_Transform{};
-
 		bool m_PositionDirty{};
 
 		bool m_MarkedForDeletion{};
 
-		float m_DeltaTime{};
+		uint32_t m_Tag {};
 
 		bool IsChildOf(const GameObject* potentialParent) const;
 		void RemoveChild(GameObject* child);

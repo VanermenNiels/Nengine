@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "Scene.h"
 #include <cassert>
+#include "CollisionManager.h"
 
 using namespace dae;
 
@@ -31,6 +32,8 @@ void Scene::Update(float deltaTime)
 		if (!object->GetParent()) // Only update root objects, as children will be updated by their parents
 			object->Update(deltaTime);
 	}
+
+	CollisionManager::GetInstance().Update(); // add this
 
 	Remove(); //Remove objects that were marked for deletion during the update
 }

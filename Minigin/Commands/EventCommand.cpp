@@ -1,17 +1,20 @@
 #include "EventCommand.h"
-#include "ScoreComponent.h"
 #include "GameObject.h"
 
-
-dae::EventCommand::EventCommand(GameObject* target, Subject* subject, unsigned int eventId):
-	Command(target), 
-	m_SubjectRPtr { subject },
-	m_EventId     { eventId }
-{
-}
+dae::EventCommand::EventCommand(GameObject* target, Observer* observer, unsigned int eventId, int value) :
+	Command(target),
+	m_ObserverRPtr{ observer },
+	m_EventId{ eventId },
+	m_Value{ value }
+{}
 
 void dae::EventCommand::Execute(float)
 {
-	if (m_SubjectRPtr)
-		m_SubjectRPtr->Notify(m_TargetGameObjectRPtr, Event{ m_EventId });
+	if (!m_ObserverRPtr) return;
+
+	Event event{ m_EventId };
+	event.args[0].intVal = m_Value;
+	event.nbArgs = 1;
+
+	m_ObserverRPtr->onNotify(m_TargetGameObjectRPtr, event);
 }

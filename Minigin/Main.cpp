@@ -19,7 +19,9 @@
 #include "Observers/ScoreDisplay.h"
 #include "Observers/HealthDisplay.h"
 #include "HealthComponent.h"
+#include "HitboxComponent.h"
 #include "Events/Event.h"
+#include "Tags.h"
 
 
 #include <filesystem>
@@ -32,7 +34,12 @@ static void load()
     inputManager.InitializeControllers();
 
     constexpr auto SCORE_EVENT = dae::make_sdbm_hash("AddScore");
-    constexpr auto DAMAGE_EVENT = dae::make_sdbm_hash("Damage");
+    auto DAMAGE_EVENT = dae::make_sdbm_hash("Damage");
+    constexpr auto OVERLAP_EVENT = dae::make_sdbm_hash("OnOverlapBegin");
+
+	dae::Event overlapE{ OVERLAP_EVENT };
+    overlapE.args[0].intVal = -1;
+    overlapE.nbArgs = 1;
 
     // --- BACKGROUND ---
     auto bg = std::make_unique<dae::GameObject>();
@@ -74,16 +81,13 @@ static void load()
     // ======================
     // --- PLAYER 1 SETUP ---
     // ======================
-    auto subject1 = new dae::Subject();
-
     auto player1 = std::make_unique<dae::GameObject>();
     player1->SetPosition(275, 300);
     player1->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+    player1->SetTag(dae::Tags::Player);
 
     // Score
     auto scoreComp1 = player1->AddComponent<dae::ScoreComponent>();
-    scoreComp1->SetSubject(subject1);
-    subject1->AddObserver(scoreComp1);
 
     auto scoreUI1 = std::make_unique<dae::GameObject>();
     auto text1 = scoreUI1->AddComponent<dae::TextComponent>("Score: 0", fontSmall);
@@ -91,12 +95,14 @@ static void load()
     scene.Add(std::move(scoreUI1));
 
     auto scoreDisplay1 = new dae::ScoreDisplay(text1, scoreComp1);
-    subject1->AddObserver(scoreDisplay1);
+    scoreComp1->AddObserver(scoreDisplay1);
 
     // Health
-    auto healthComp1 = player1->AddComponent<dae::HealthComponent>(3);
-    healthComp1->SetSubject(subject1);
-    subject1->AddObserver(healthComp1);
+    auto healthComp1 = player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>
+    {
+        dae::make_sdbm_hash("Damage"),
+        dae::make_sdbm_hash("OnOverlapBegin")
+    });
 
     auto healthUI1 = std::make_unique<dae::GameObject>();
     auto hText1 = healthUI1->AddComponent<dae::TextComponent>("Lives: 3", fontSmall);
@@ -104,7 +110,12 @@ static void load()
     scene.Add(std::move(healthUI1));
 
     auto healthDisplay1 = new dae::HealthDisplay(hText1, healthComp1);
-    subject1->AddObserver(healthDisplay1);
+    healthComp1->AddObserver(healthDisplay1);
+
+    // Hitbox — reacts to Enemy tag, notifies healthComp1 on overlap
+    auto hitbox1 = player1->AddComponent<dae::HitboxComponent>(overlapE, 18.f, 18.f);
+    hitbox1->SetTargetTags(dae::Tags::Enemy);
+    hitbox1->AddObserver(healthComp1);
 
     // Movement bindings
     inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 1,0,0 }, 200.f), dae::InputManager::InputType::Down);
@@ -112,26 +123,22 @@ static void load()
     inputManager.BindKeyboardCommand(SDLK_S, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 0,1,0 }, 200.f), dae::InputManager::InputType::Down);
     inputManager.BindKeyboardCommand(SDLK_W, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 0,-1,0 }, 200.f), dae::InputManager::InputType::Down);
 
-    // Event bindings
-    inputManager.BindKeyboardCommand(SDLK_Z, std::make_unique<dae::EventCommand>(player1.get(), subject1, SCORE_EVENT), dae::InputManager::InputType::Pressed);
-    inputManager.BindKeyboardCommand(SDLK_X, std::make_unique<dae::EventCommand>(player1.get(), subject1, SCORE_EVENT), dae::InputManager::InputType::Pressed);
-    inputManager.BindKeyboardCommand(SDLK_C, std::make_unique<dae::EventCommand>(player1.get(), subject1, DAMAGE_EVENT), dae::InputManager::InputType::Pressed);
+    inputManager.BindKeyboardCommand(SDLK_Z, std::make_unique<dae::EventCommand>(player1.get(), scoreComp1, SCORE_EVENT, 10), dae::InputManager::InputType::Pressed);
+    inputManager.BindKeyboardCommand(SDLK_X, std::make_unique<dae::EventCommand>(player1.get(), scoreComp1, SCORE_EVENT, 3), dae::InputManager::InputType::Pressed);
+    inputManager.BindKeyboardCommand(SDLK_C, std::make_unique<dae::EventCommand>(player1.get(), healthComp1, DAMAGE_EVENT, 1), dae::InputManager::InputType::Pressed);
 
     scene.Add(std::move(player1));
 
     // ======================
     // --- PLAYER 2 SETUP ---
     // ======================
-    auto subject2 = new dae::Subject();
-
     auto player2 = std::make_unique<dae::GameObject>();
     player2->SetPosition(250, 300);
     player2->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
+    player2->SetTag(dae::Tags::Enemy); // tag as Enemy so player1 hitbox reacts to it
 
     // Score
     auto scoreComp2 = player2->AddComponent<dae::ScoreComponent>();
-    scoreComp2->SetSubject(subject2);
-    subject2->AddObserver(scoreComp2);
 
     auto scoreUI2 = std::make_unique<dae::GameObject>();
     auto text2 = scoreUI2->AddComponent<dae::TextComponent>("Score: 0", fontSmall);
@@ -139,12 +146,14 @@ static void load()
     scene.Add(std::move(scoreUI2));
 
     auto scoreDisplay2 = new dae::ScoreDisplay(text2, scoreComp2);
-    subject2->AddObserver(scoreDisplay2);
+    scoreComp2->AddObserver(scoreDisplay2);
 
     // Health
-    auto healthComp2 = player2->AddComponent<dae::HealthComponent>(3);
-    healthComp2->SetSubject(subject2);
-    subject2->AddObserver(healthComp2);
+    auto healthComp2 = player2->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>
+    {
+        dae::make_sdbm_hash("Damage"),
+        dae::make_sdbm_hash("OnOverlapBegin")
+    });
 
     auto healthUI2 = std::make_unique<dae::GameObject>();
     auto hText2 = healthUI2->AddComponent<dae::TextComponent>("Lives: 3", fontSmall);
@@ -152,31 +161,35 @@ static void load()
     scene.Add(std::move(healthUI2));
 
     auto healthDisplay2 = new dae::HealthDisplay(hText2, healthComp2);
-    subject2->AddObserver(healthDisplay2);
+    healthComp2->AddObserver(healthDisplay2);
+
+    // Hitbox — reacts to Player tag, notifies healthComp2 on overlap
+    auto hitbox2 = player2->AddComponent<dae::HitboxComponent>(overlapE, 18.f, 18.f);
+    hitbox2->SetTargetTags(dae::Tags::Player);
+    hitbox2->AddObserver(healthComp2);
 
     // Controller movement bindings
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_RIGHT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 1,0,0 }, 200.f),  dae::InputManager::InputType::Down);
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_LEFT,  std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ -1,0,0 }, 200.f), dae::InputManager::InputType::Down);
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_DOWN,  std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,1,0 }, 200.f),  dae::InputManager::InputType::Down);
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_UP,    std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,-1,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_RIGHT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 1,0,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_LEFT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ -1,0,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_DOWN, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,1,0 }, 200.f), dae::InputManager::InputType::Down);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_UP, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 0,-1,0 }, 200.f), dae::InputManager::InputType::Down);
 
-    // Controller event bindings
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_A, std::make_unique<dae::EventCommand>(player2.get(), subject2, SCORE_EVENT),  dae::InputManager::InputType::Pressed);
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_B, std::make_unique<dae::EventCommand>(player2.get(), subject2, SCORE_EVENT),  dae::InputManager::InputType::Pressed);
-    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_X, std::make_unique<dae::EventCommand>(player2.get(), subject2, DAMAGE_EVENT), dae::InputManager::InputType::Pressed);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_A, std::make_unique<dae::EventCommand>(player2.get(), scoreComp2, SCORE_EVENT), dae::InputManager::InputType::Pressed);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_B, std::make_unique<dae::EventCommand>(player2.get(), scoreComp2, SCORE_EVENT), dae::InputManager::InputType::Pressed);
+    inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_X, std::make_unique<dae::EventCommand>(player2.get(), healthComp2, DAMAGE_EVENT), dae::InputManager::InputType::Pressed);
 
     scene.Add(std::move(player2));
 }
 
-int main(int, char*[]) {
+int main(int, char* []) {
 #if __EMSCRIPTEN__
-	fs::path data_location = "";
+    fs::path data_location = "";
 #else
-	fs::path data_location = "./Data/";
-	if(!fs::exists(data_location))
-		data_location = "../Data/";
+    fs::path data_location = "./Data/";
+    if (!fs::exists(data_location))
+        data_location = "../Data/";
 #endif
-	dae::Minigin engine(data_location);
-	engine.Run(load);
+    dae::Minigin engine(data_location);
+    engine.Run(load);
     return 0;
 }
