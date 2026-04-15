@@ -34,12 +34,17 @@ static void load()
     inputManager.InitializeControllers();
 
     constexpr auto SCORE_EVENT = dae::make_sdbm_hash("AddScore");
-    auto DAMAGE_EVENT = dae::make_sdbm_hash("Damage");
+    constexpr auto DAMAGE_EVENT = dae::make_sdbm_hash("Damage");
     constexpr auto OVERLAP_EVENT = dae::make_sdbm_hash("OnOverlapBegin");
+    constexpr auto OVERLAP_END_EVENT = dae::make_sdbm_hash("OnOverlapEnd");
 
-	dae::Event overlapE{ OVERLAP_EVENT };
-    overlapE.args[0].intVal = -1;
-    overlapE.nbArgs = 1;
+	dae::Event beginOE{ OVERLAP_EVENT };
+    beginOE.args[0].intVal = -1;
+    beginOE.nbArgs = 1;
+
+	dae::Event endOE{ OVERLAP_END_EVENT };
+    endOE.args[0].intVal = 10;
+    endOE.nbArgs = 1;
 
     // --- BACKGROUND ---
     auto bg = std::make_unique<dae::GameObject>();
@@ -87,7 +92,10 @@ static void load()
     player1->SetTag(dae::Tags::Player);
 
     // Score
-    auto scoreComp1 = player1->AddComponent<dae::ScoreComponent>();
+    auto scoreComp1 = player1->AddComponent<dae::ScoreComponent>(std::vector<dae::EventId>
+        {
+            OVERLAP_END_EVENT
+        });
 
     auto scoreUI1 = std::make_unique<dae::GameObject>();
     auto text1 = scoreUI1->AddComponent<dae::TextComponent>("Score: 0", fontSmall);
@@ -101,7 +109,7 @@ static void load()
     auto healthComp1 = player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>
     {
         dae::make_sdbm_hash("Damage"),
-        dae::make_sdbm_hash("OnOverlapBegin")
+        OVERLAP_EVENT
     });
 
     auto healthUI1 = std::make_unique<dae::GameObject>();
@@ -113,9 +121,10 @@ static void load()
     healthComp1->AddObserver(healthDisplay1);
 
     // Hitbox — reacts to Enemy tag, notifies healthComp1 on overlap
-    auto hitbox1 = player1->AddComponent<dae::HitboxComponent>(overlapE, 18.f, 18.f);
+    auto hitbox1 = player1->AddComponent<dae::HitboxComponent>(beginOE, endOE, 18.f, 18.f);
     hitbox1->SetTargetTags(dae::Tags::Enemy);
     hitbox1->AddObserver(healthComp1);
+    hitbox1->AddObserver(scoreComp1);
 
     // Movement bindings
     inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 1,0,0 }, 200.f), dae::InputManager::InputType::Down);
@@ -164,7 +173,7 @@ static void load()
     healthComp2->AddObserver(healthDisplay2);
 
     // Hitbox — reacts to Player tag, notifies healthComp2 on overlap
-    auto hitbox2 = player2->AddComponent<dae::HitboxComponent>(overlapE, 18.f, 18.f);
+    auto hitbox2 = player2->AddComponent<dae::HitboxComponent>(beginOE, endOE, 18.f, 18.f);
     hitbox2->SetTargetTags(dae::Tags::Player);
     hitbox2->AddObserver(healthComp2);
 

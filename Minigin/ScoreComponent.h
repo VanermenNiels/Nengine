@@ -1,27 +1,21 @@
 #pragma once
-#include "BaseComponent.h"
-#include "Events/Subject.h"
-#include "Observers/Observer.h"
+#include "Components/ObserverComponent.h"
 #include "Events/Event.h"
 
 namespace dae
 {
-	class ScoreComponent final : public BaseComponent, public Observer
+	class ScoreComponent final : public ObserverComponent
 	{
 	public:
-		ScoreComponent(GameObject* owner, int score = 0);
+		ScoreComponent(GameObject* owner, std::vector<EventId> reactsTo = {}, int score = 0);
 
 		void AddScore(int scoreToAdd);
 		int  GetScore() const { return m_Score; }
 
-		void onNotify(GameObject*, Event event) override;
-
-		void AddObserver(Observer* o) { m_Subject.AddObserver(o); }
-		void RemoveObserver(Observer* o) { m_Subject.RemoveObserver(o); }
+	protected:
+		void EventReaction(Event event) override;
 
 	private:
 		int m_Score{};
-
-		Subject m_Subject{};
 	};
 }

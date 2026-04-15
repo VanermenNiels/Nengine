@@ -3,13 +3,14 @@
 #include "GameObject.h"
 #include <algorithm>
 
-dae::HitboxComponent::HitboxComponent(GameObject* owner, Event overlapEvent, float width, float height, float offsetX, float offsetY)
+dae::HitboxComponent::HitboxComponent(GameObject* owner, Event beginOE, Event endOE, float width, float height, float offsetX, float offsetY)
 	: BaseComponent(owner)
 	, m_Width{ width }
 	, m_Height{ height }
 	, m_OffsetX{ offsetX }
 	, m_OffsetY{ offsetY }
-	,m_OverlapEvent{ overlapEvent }
+	,m_BeginbeginOEvent{ beginOE }
+	, m_EndbeginOEvent{ endOE }
 {
 	CollisionManager::GetInstance().RegisterHitbox(this);
 }
@@ -27,7 +28,7 @@ dae::Rectf dae::HitboxComponent::GetWorldRect()
 
 bool dae::HitboxComponent::Overlaps(HitboxComponent* other)
 {
-	auto thisRect { GetWorldRect() };
+	auto thisRect  { GetWorldRect() };
 	auto otherRect { other->GetWorldRect() };
 
 	return  thisRect.x < otherRect.x + otherRect.width &&
@@ -46,15 +47,13 @@ void dae::HitboxComponent::NotifyOverlapBegin(HitboxComponent* other)
 
 	if (!wasOverlapping)
 	{
-		/*Event event{ make_sdbm_hash("OnOverlapBegin") };*/
-		m_Subject.Notify(GetOwner(), m_OverlapEvent);
+		m_Subject.Notify(GetOwner(), m_BeginbeginOEvent);
 	}
 }
 
-void dae::HitboxComponent::NotifyOverlapEnd(HitboxComponent* other)
+void dae::HitboxComponent::NotifybeginOEnd(HitboxComponent* other)
 {
-	Event event{ make_sdbm_hash("OnOverlapEnd") };
-	m_Subject.Notify(other->GetOwner(), event);
+	m_Subject.Notify(other->GetOwner(), m_EndbeginOEvent);
 }
 
 void dae::HitboxComponent::ClearFrameOverlaps()
@@ -64,7 +63,7 @@ void dae::HitboxComponent::ClearFrameOverlaps()
 		bool stillOverlapping { std::find(m_CurrentOverlaps.begin(), m_CurrentOverlaps.end(), prev) != m_CurrentOverlaps.end() };
 
 		if (!stillOverlapping)
-			NotifyOverlapEnd(prev->GetComponent<HitboxComponent>());
+			NotifybeginOEnd(prev->GetComponent<HitboxComponent>());
 	}
 
 	m_PreviousOverlaps = std::move(m_CurrentOverlaps);

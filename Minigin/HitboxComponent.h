@@ -15,7 +15,7 @@ namespace dae
 	class HitboxComponent final : public BaseComponent
 	{
 	public:
-		HitboxComponent(GameObject* owner, Event overlapEvent, float width, float height, float offsetX = 0.f, float offsetY = 0.f);
+		HitboxComponent(GameObject* owner, Event beginOE, Event endOE, float width, float height, float offsetX = 0.f, float offsetY = 0.f);
 		~HitboxComponent();
 
 		Rectf GetWorldRect();
@@ -28,7 +28,7 @@ namespace dae
 		void RemoveObserver(Observer* o) { m_Subject.RemoveObserver(o); }
 
 		void NotifyOverlapBegin(HitboxComponent* other);
-		void NotifyOverlapEnd(HitboxComponent* other);
+		void NotifybeginOEnd(HitboxComponent* other);
 		void ClearFrameOverlaps();
 
 	private:
@@ -38,7 +38,8 @@ namespace dae
 
 		Subject m_Subject{};
 
-		Event m_OverlapEvent;
+		Event m_BeginbeginOEvent;
+		Event m_EndbeginOEvent;
 
 		std::vector<GameObject*> m_CurrentOverlaps{};
 		std::vector<GameObject*> m_PreviousOverlaps{};
