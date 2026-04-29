@@ -4,7 +4,7 @@
 dae::EventCommand::EventCommand(GameObject* target, Observer* observer, unsigned int eventId, int value) :
 	Command(target),
 	m_ObserverRPtr{ observer },
-	m_EventId{ eventId },
+	m_EventId { eventId },
 	m_Value{ value }
 {}
 

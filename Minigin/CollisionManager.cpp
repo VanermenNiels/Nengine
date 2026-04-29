@@ -8,7 +8,7 @@ void dae::CollisionManager::RegisterHitbox(HitboxComponent* hitbox)
 
 void dae::CollisionManager::UnregisterHitbox(HitboxComponent * hitbox)
 {
-	auto it = std::find(m_Hitboxes.begin(), m_Hitboxes.end(), hitbox);
+	auto it { std::find(m_Hitboxes.begin(), m_Hitboxes.end(), hitbox) };
 	if (it != m_Hitboxes.end())
 		m_Hitboxes.erase(it);
 }
@@ -16,16 +16,18 @@ void dae::CollisionManager::UnregisterHitbox(HitboxComponent * hitbox)
 void dae::CollisionManager::Update()
 {
 	for (auto* hb : m_Hitboxes)
+	{
 		hb->ClearFrameOverlaps();
+	}
 
-	for (size_t  h {}; h < m_Hitboxes.size() - 1; ++h)
+	for (size_t h {}; h < m_Hitboxes.size() - 1; ++h)
 	{
 		auto hitbox { m_Hitboxes[h] };
 
 		if (!hitbox->IsEnabled())
 			continue;
 
-		for (size_t  o { h + 1}; o < m_Hitboxes.size(); ++o)
+		for (size_t o { h + 1}; o < m_Hitboxes.size(); ++o)
 		{
 			auto otherHitbox{ m_Hitboxes[o] };
 			if (!otherHitbox->IsEnabled())

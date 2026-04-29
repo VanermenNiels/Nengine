@@ -18,17 +18,25 @@
 #include "Commands/EventCommand.h"
 #include "Observers/ScoreDisplay.h"
 #include "Observers/HealthDisplay.h"
+#include "Observers/SoundObserver.h"
 #include "HealthComponent.h"
 #include "HitboxComponent.h"
 #include "Events/Event.h"
 #include "Tags.h"
-
+#include "Sound/ServiceLocator.h"
+#include "Sound/SDLMixerSoundService.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
+static std::unique_ptr<dae::SDLMixerSoundService> s_SoundService;
+
 static void load()
 {
+    // --- SOUND SERVICE ---
+    s_SoundService = std::make_unique<dae::SDLMixerSoundService>();
+    dae::ServiceLocator::RegisterSoundService(s_SoundService.get());
+
     auto& scene = dae::SceneManager::GetInstance().CreateScene();
     auto& inputManager = dae::InputManager::GetInstance();
     inputManager.InitializeControllers();
@@ -38,11 +46,11 @@ static void load()
     constexpr auto OVERLAP_EVENT = dae::make_sdbm_hash("OnOverlapBegin");
     constexpr auto OVERLAP_END_EVENT = dae::make_sdbm_hash("OnOverlapEnd");
 
-	dae::Event beginOE{ OVERLAP_EVENT };
+    dae::Event beginOE{ OVERLAP_EVENT };
     beginOE.args[0].intVal = -1;
     beginOE.nbArgs = 1;
 
-	dae::Event endOE{ OVERLAP_END_EVENT };
+    dae::Event endOE{ OVERLAP_END_EVENT };
     endOE.args[0].intVal = 10;
     endOE.nbArgs = 1;
 
@@ -93,9 +101,9 @@ static void load()
 
     // Score
     auto scoreComp1 = player1->AddComponent<dae::ScoreComponent>(std::vector<dae::EventId>
-        {
-            OVERLAP_END_EVENT
-        });
+    {
+        OVERLAP_END_EVENT
+    });
 
     auto scoreUI1 = std::make_unique<dae::GameObject>();
     auto text1 = scoreUI1->AddComponent<dae::TextComponent>("Score: 0", fontSmall);
@@ -109,7 +117,7 @@ static void load()
     auto healthComp1 = player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>
     {
         dae::make_sdbm_hash("Damage"),
-        OVERLAP_EVENT
+            OVERLAP_EVENT
     });
 
     auto healthUI1 = std::make_unique<dae::GameObject>();
@@ -120,11 +128,16 @@ static void load()
     auto healthDisplay1 = new dae::HealthDisplay(hText1, healthComp1);
     healthComp1->AddObserver(healthDisplay1);
 
-    // Hitbox — reacts to Enemy tag, notifies healthComp1 on overlap
+    // Hitbox
     auto hitbox1 = player1->AddComponent<dae::HitboxComponent>(beginOE, endOE, 18.f, 18.f);
     hitbox1->SetTargetTags(dae::Tags::Enemy);
     hitbox1->AddObserver(healthComp1);
     hitbox1->AddObserver(scoreComp1);
+
+    // Sound observer for player1 hitbox
+    auto* soundObserver1 = new dae::SoundObserver(&dae::ServiceLocator::GetSoundService());
+    soundObserver1->BindSound(OVERLAP_EVENT, "Data/IceBlockDestroy.mp3", 100);
+    hitbox1->AddObserver(soundObserver1);
 
     // Movement bindings
     inputManager.BindKeyboardCommand(SDLK_D, std::make_unique<dae::MoveCommand>(player1.get(), glm::vec3{ 1,0,0 }, 200.f), dae::InputManager::InputType::Down);
@@ -144,7 +157,7 @@ static void load()
     auto player2 = std::make_unique<dae::GameObject>();
     player2->SetPosition(250, 300);
     player2->AddComponent<dae::RenderComponent>()->SetTexture("PengoCharacter.png");
-    player2->SetTag(dae::Tags::Enemy); // tag as Enemy so player1 hitbox reacts to it
+    player2->SetTag(dae::Tags::Enemy);
 
     // Score
     auto scoreComp2 = player2->AddComponent<dae::ScoreComponent>();
@@ -161,7 +174,7 @@ static void load()
     auto healthComp2 = player2->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>
     {
         dae::make_sdbm_hash("Damage"),
-        dae::make_sdbm_hash("OnOverlapBegin")
+            dae::make_sdbm_hash("OnOverlapBegin")
     });
 
     auto healthUI2 = std::make_unique<dae::GameObject>();
@@ -172,10 +185,15 @@ static void load()
     auto healthDisplay2 = new dae::HealthDisplay(hText2, healthComp2);
     healthComp2->AddObserver(healthDisplay2);
 
-    // Hitbox — reacts to Player tag, notifies healthComp2 on overlap
+    // Hitbox
     auto hitbox2 = player2->AddComponent<dae::HitboxComponent>(beginOE, endOE, 18.f, 18.f);
     hitbox2->SetTargetTags(dae::Tags::Player);
     hitbox2->AddObserver(healthComp2);
+
+    // Sound observer for player2 hitbox
+    auto* soundObserver2 = new dae::SoundObserver(&dae::ServiceLocator::GetSoundService());
+    soundObserver2->BindSound(OVERLAP_EVENT, "IceBlockDestroy.mp3", 100);
+    hitbox2->AddObserver(soundObserver2);
 
     // Controller movement bindings
     inputManager.BindControllerCommand(0, XINPUT_GAMEPAD_DPAD_RIGHT, std::make_unique<dae::MoveCommand>(player2.get(), glm::vec3{ 1,0,0 }, 200.f), dae::InputManager::InputType::Down);

@@ -17,6 +17,11 @@ namespace dae
 	private:
 		friend class Singleton<CollisionManager>;
 		CollisionManager() = default;
+		CollisionManager(const CollisionManager&) = delete;
+		CollisionManager(CollisionManager&&) = delete;
+		CollisionManager& operator=(const CollisionManager&) = delete;
+		CollisionManager& operator=(CollisionManager&&) = delete;
+
 
 		std::vector<HitboxComponent*> m_Hitboxes{};
 	};

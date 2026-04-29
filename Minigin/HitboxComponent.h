@@ -16,8 +16,12 @@ namespace dae
 	{
 	public:
 		HitboxComponent(GameObject* owner, Event beginOE, Event endOE, float width, float height, float offsetX = 0.f, float offsetY = 0.f);
+		HitboxComponent(GameObject* owner, float width, float height, float offsetX = 0.f, float offsetY = 0.f);
+
 		~HitboxComponent();
 
+		void Update(float) override;
+		
 		Rectf GetWorldRect();
 		bool  Overlaps(HitboxComponent* other);
 
@@ -38,10 +42,13 @@ namespace dae
 
 		Subject m_Subject{};
 
-		Event m_BeginbeginOEvent;
-		Event m_EndbeginOEvent;
+		Event m_BeginOEvent;
+		Event m_EndOEvent;
 
 		std::vector<GameObject*> m_CurrentOverlaps{};
 		std::vector<GameObject*> m_PreviousOverlaps{};
+
+
+		static std::vector<HitboxComponent> sm_AllHitboxes;
 	};
 }

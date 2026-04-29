@@ -9,8 +9,20 @@ dae::HitboxComponent::HitboxComponent(GameObject* owner, Event beginOE, Event en
 	, m_Height{ height }
 	, m_OffsetX{ offsetX }
 	, m_OffsetY{ offsetY }
-	,m_BeginbeginOEvent{ beginOE }
-	, m_EndbeginOEvent{ endOE }
+	, m_BeginOEvent { beginOE }
+	, m_EndOEvent { endOE }
+{
+	CollisionManager::GetInstance().RegisterHitbox(this);
+}
+
+dae::HitboxComponent::HitboxComponent(GameObject* owner, float width, float height, float offsetX, float offsetY)
+	: BaseComponent(owner)
+	, m_Width{ width }
+	, m_Height{ height }
+	, m_OffsetX{ offsetX }
+	, m_OffsetY{ offsetY }
+	, m_BeginOEvent{ }
+	, m_EndOEvent{ }
 {
 	CollisionManager::GetInstance().RegisterHitbox(this);
 }
@@ -20,16 +32,21 @@ dae::HitboxComponent::~HitboxComponent()
 	CollisionManager::GetInstance().UnregisterHitbox(this);
 }
 
+void dae::HitboxComponent::Update(float)
+{
+
+}
+
 dae::Rectf dae::HitboxComponent::GetWorldRect()
 {
-	const auto& pos = GetOwner()->GetWorldPosition();
+	const auto& pos{ GetOwner()->GetWorldPosition() };
 	return { pos.x + m_OffsetX, pos.y + m_OffsetY, m_Width, m_Height };
 }
 
 bool dae::HitboxComponent::Overlaps(HitboxComponent* other)
 {
-	auto thisRect  { GetWorldRect() };
-	auto otherRect { other->GetWorldRect() };
+	const auto& thisRect  { GetWorldRect() };
+	const auto& otherRect { other->GetWorldRect() };
 
 	return  thisRect.x < otherRect.x + otherRect.width &&
 			thisRect.x + thisRect.width > otherRect.x &&
@@ -42,18 +59,16 @@ void dae::HitboxComponent::NotifyOverlapBegin(HitboxComponent* other)
 	m_CurrentOverlaps.push_back(other->GetOwner());
 
 	bool wasOverlapping = std::find(m_PreviousOverlaps.begin(),
-		m_PreviousOverlaps.end(), other->GetOwner())
-		!= m_PreviousOverlaps.end();
+									m_PreviousOverlaps.end(), other->GetOwner())
+									!= m_PreviousOverlaps.end();
 
 	if (!wasOverlapping)
-	{
-		m_Subject.Notify(GetOwner(), m_BeginbeginOEvent);
-	}
+		m_Subject.Notify(GetOwner(), m_BeginOEvent);
 }
 
 void dae::HitboxComponent::NotifybeginOEnd(HitboxComponent* other)
 {
-	m_Subject.Notify(other->GetOwner(), m_EndbeginOEvent);
+	m_Subject.Notify(other->GetOwner(), m_EndOEvent);
 }
 
 void dae::HitboxComponent::ClearFrameOverlaps()
