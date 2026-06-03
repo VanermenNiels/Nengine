@@ -14,11 +14,21 @@ void dae::RenderComponent::Render() const
 	if (m_TextureRPtr)
 	{
 		const auto& pos { GetOwner()->GetWorldPosition()};
-		Renderer::GetInstance().RenderTexture(*m_TextureRPtr, pos.x, pos.y);
+
+		if (m_UsingSrcRect)
+			Renderer::GetInstance().RenderTexture(*m_TextureRPtr, pos.x, pos.y, m_SourceRect);
+		else 
+			Renderer::GetInstance().RenderTexture(*m_TextureRPtr, pos.x, pos.y);
 	}
 }
 
 void dae::RenderComponent::SetTexture(const std::string& filename)
 {
 	m_TextureRPtr = ResourceManager::GetInstance().LoadTexture(filename);
+}
+
+void dae::RenderComponent::EnableSrcRect(SDL_Rect newSrcRect)
+{
+	m_SourceRect = newSrcRect;
+	m_UsingSrcRect = true;
 }

@@ -40,23 +40,34 @@ public:
 
     ~Impl()
     {
+        // Signal thread to stop - drain queue first so thread doesn't
+        // try to process events after we start destroying MIX objects
         {
             std::lock_guard lock(m_Mutex);
             m_Running = false;
+            // Clear the queue so the thread won't try to process anything
+            while (!m_Queue.empty())
+                m_Queue.pop();
         }
         m_CV.notify_all();
+
+        // Wait for thread to fully exit before touching MIX objects
         if (m_Thread.joinable())
             m_Thread.join();
 
-        for (auto* pTrack : m_ActiveTracks)
+        // Thread is dead, now safe to destroy everything
         {
-            if (pTrack)
+            std::lock_guard lock(m_TrackMutex);
+            for (auto* pTrack : m_ActiveTracks)
             {
-                MIX_StopTrack(pTrack, 0);
-                MIX_DestroyTrack(pTrack);
+                if (pTrack)
+                {
+                    MIX_StopTrack(pTrack, 0);
+                    MIX_DestroyTrack(pTrack);
+                }
             }
+            m_ActiveTracks.clear();
         }
-        m_ActiveTracks.clear();
 
         for (auto& [name, pAudio] : m_Cache)
         {
@@ -78,6 +89,7 @@ public:
     {
         {
             std::lock_guard lock(m_Mutex);
+            if (!m_Running) return; // don't enqueue if shutting down
             m_Queue.push({ filename, volume });
         }
         m_CV.notify_one();
@@ -88,6 +100,7 @@ public:
 private:
     void CleanupFinishedTracks()
     {
+        std::lock_guard lock(m_TrackMutex);
         m_ActiveTracks.erase(
             std::remove_if(m_ActiveTracks.begin(), m_ActiveTracks.end(), [](MIX_Track* pTrack)
                 {
@@ -104,15 +117,20 @@ private:
     {
         while (true)
         {
-            std::unique_lock lock(m_Mutex);
-            m_CV.wait(lock, [this] { return !m_Queue.empty() || !m_Running; });
+            SoundEvent ev{};
 
-            if (!m_Running && m_Queue.empty())
-                return;
+            {
+                std::unique_lock lock(m_Mutex);
+                m_CV.wait(lock, [this] { return !m_Queue.empty() || !m_Running; });
 
-            SoundEvent ev = m_Queue.front();
-            m_Queue.pop();
-            lock.unlock();
+                // If shutting down, exit immediately regardless of queue state
+                // (destructor already cleared the queue)
+                if (!m_Running)
+                    return;
+
+                ev = m_Queue.front();
+                m_Queue.pop();
+            }
 
             if (!m_pMixer) continue;
 
@@ -153,7 +171,10 @@ private:
                 continue;
             }
 
-            m_ActiveTracks.push_back(pTrack);
+            {
+                std::lock_guard lock(m_TrackMutex);
+                m_ActiveTracks.push_back(pTrack);
+            }
         }
     }
 
@@ -162,6 +183,7 @@ private:
     std::vector<MIX_Track*>                     m_ActiveTracks;
     std::thread                                 m_Thread;
     std::mutex                                  m_Mutex;
+    std::mutex                                  m_TrackMutex;
     std::condition_variable                     m_CV;
     bool                                        m_Running{ false };
     MIX_Mixer* m_pMixer{ nullptr };

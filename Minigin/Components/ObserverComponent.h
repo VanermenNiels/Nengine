@@ -15,6 +15,8 @@ namespace dae
 		void AddObserver(Observer* o) { m_Subject.AddObserver(o); }
 		void RemoveObserver(Observer* o) { m_Subject.RemoveObserver(o); }
 
+		void AddEventToReact(EventId event) { m_ReactsTo.push_back(event); }
+
 	protected:
 		// Use this in later derived classes to react to events.
 		virtual void EventReaction(Event) {};

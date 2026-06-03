@@ -2,6 +2,7 @@
 #include <string>
 #include "RenderComponent.h"
 #include <SDL3_ttf/SDL_ttf.h>
+#include <memory>
 
 namespace dae
 {

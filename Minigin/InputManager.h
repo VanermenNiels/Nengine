@@ -4,51 +4,48 @@
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <set>
 #include "Commands/Command.h"
 #include "ControllerInput.h"
 #include <array>
 
-
 namespace dae
 {
+    class InputManager final : public Singleton<InputManager>
+    {
+    public:
+        enum class InputType
+        {
+            Pressed,
+            Released,
+            Down
+        };
 
-	class InputManager final : public Singleton<InputManager>
-	{
-	public:
+        void InitializeControllers();
+        bool ProcessInput(float deltaTime);
 
-		enum class InputType
-		{
-			Pressed,
-			Released,
-			Down
-		};
+        void BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup = -1, bool ignoreExclusiveGroup = false);
+        void UnBindKeyboardCommand(SDL_Keycode key);
 
-		void InitializeControllers();
-		bool ProcessInput(float deltaTime);
+        void BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup = -1, bool ignoreExclusiveGroup = false);
 
-		void BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command, InputType inputType);
-		void UnBindKeyboardCommand(SDL_Keycode key);
+    private:
+        struct InputBinding
+        {
+            InputType type;
+            std::unique_ptr<Command> command;
+            int exclusiveGroup{ -1 };
+            bool ignoreExclusiveGroup{ false };
+        };
 
-		void BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType);
+        std::unordered_multimap<SDL_Keycode, InputBinding> m_KeyBindings;
 
-	private:
+        std::vector<ControllerInput> m_Controllers;
 
-		struct InputBinding
-		{
-			InputType type;
-			std::unique_ptr<Command> command;
-		};
+        static const int MAX_CONTROLLERS{ 4 };
 
-		std::unordered_map<SDL_Keycode, InputBinding> m_KeyBindings;
+        std::array<std::multimap<WORD, InputBinding>, MAX_CONTROLLERS> m_ControllerBindings;
 
-		std::vector<ControllerInput> m_Controllers;
-
-		static const int MAX_CONTROLLERS{ 4 };
-
-		std::array<std::map<WORD, InputBinding>, MAX_CONTROLLERS> m_ControllerBindings;
-
-		// In the private section
-		std::vector<bool> m_PreviousKeyboardState;
-		static const int SDL_NUM_SCANCODES_COUNT{ 512 }; // SDL3's scancode count
-	};
+        std::vector<bool> m_PreviousKeyboardState;
+    };
 }

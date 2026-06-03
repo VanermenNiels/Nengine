@@ -36,7 +36,8 @@ namespace dae
 		void ClearFrameOverlaps();
 
 	private:
-		float    m_Width, m_Height;
+		float m_Width;
+		float m_Height;
 		float    m_OffsetX, m_OffsetY;
 		uint32_t m_TargetTagMask{ 0xFFFFFFFF };
 

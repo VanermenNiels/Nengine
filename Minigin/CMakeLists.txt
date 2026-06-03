@@ -31,7 +31,8 @@ add_library(Minigin STATIC
     CollisionManager.cpp
     Sound/ServiceLocator.cpp 
     Sound/SDLMixerSoundService.cpp 
-    Observers/SoundObserver.cpp)
+    Observers/SoundObserver.cpp 
+    AnimatorComponent.cpp)
 
 target_include_directories(Minigin PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}

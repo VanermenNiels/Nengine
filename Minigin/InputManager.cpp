@@ -1,6 +1,7 @@
 #include <backends/imgui_impl_sdl3.h>
 #include <SDL3/SDL.h>
 #include "InputManager.h"
+#include <set>
 
 void dae::InputManager::InitializeControllers()
 {
@@ -8,9 +9,7 @@ void dae::InputManager::InitializeControllers()
     m_Controllers.reserve(MAX_CONTROLLERS);
 
     for (int c{}; c < MAX_CONTROLLERS; ++c)
-    {
         m_Controllers.emplace_back(c);
-    }
 }
 
 bool dae::InputManager::ProcessInput(float deltaTime)
@@ -28,38 +27,40 @@ bool dae::InputManager::ProcessInput(float deltaTime)
     int numKeys{};
     const bool* keyboardState = SDL_GetKeyboardState(&numKeys);
 
-    // Initialize previous state on first run
     if (m_PreviousKeyboardState.empty())
         m_PreviousKeyboardState.assign(numKeys, false);
+
+    std::set<int> firedGroups{};
 
     for (const auto& [key, inputBinding] : m_KeyBindings)
     {
         SDL_Scancode scancode = SDL_GetScancodeFromKey(key, SDL_KMOD_NONE);
         if (scancode == SDL_SCANCODE_UNKNOWN) continue;
 
-        const bool isDown  { keyboardState[scancode] };
-        const bool wasDown { m_PreviousKeyboardState[scancode] };
+        if (!inputBinding.ignoreExclusiveGroup &&
+            inputBinding.exclusiveGroup >= 0 &&
+            firedGroups.contains(inputBinding.exclusiveGroup))
+            continue;
 
+        const bool isDown{ keyboardState[scancode] };
+        const bool wasDown{ m_PreviousKeyboardState[scancode] };
+
+        bool shouldFire = false;
         switch (inputBinding.type)
         {
-        case InputType::Pressed:
-            if (isDown && !wasDown)
-                inputBinding.command->Execute(deltaTime);
-            break;
+        case InputType::Pressed:  shouldFire = isDown && !wasDown;  break;
+        case InputType::Released: shouldFire = !isDown && wasDown;  break;
+        case InputType::Down:     shouldFire = isDown;              break;
+        }
 
-        case InputType::Released:
-            if (!isDown && wasDown)
-                inputBinding.command->Execute(deltaTime);
-            break;
-
-        case InputType::Down:
-            if (isDown)
-                inputBinding.command->Execute(deltaTime);
-            break;
+        if (shouldFire)
+        {
+            inputBinding.command->Execute(deltaTime);
+            if (!inputBinding.ignoreExclusiveGroup && inputBinding.exclusiveGroup >= 0)
+                firedGroups.insert(inputBinding.exclusiveGroup);
         }
     }
 
-    // Save state for next frame — copy the raw array into the vector
     std::copy(keyboardState, keyboardState + numKeys, m_PreviousKeyboardState.begin());
 
     // --- Controllers ---
@@ -71,38 +72,37 @@ bool dae::InputManager::ProcessInput(float deltaTime)
         if (!controller.IsConnected())
             continue;
 
+        std::set<int> controllerFiredGroups{};
+
         for (const auto& [button, inputBinding] : m_ControllerBindings[c])
         {
+            if (!inputBinding.ignoreExclusiveGroup &&
+                inputBinding.exclusiveGroup >= 0 &&
+                controllerFiredGroups.contains(inputBinding.exclusiveGroup))
+                continue;
+
+            bool shouldFire = false;
             switch (inputBinding.type)
             {
-            case InputType::Pressed:
+            case InputType::Pressed:  shouldFire = controller.IsPressed(button);  break;
+            case InputType::Released: shouldFire = controller.IsReleased(button); break;
+            case InputType::Down:     shouldFire = controller.IsDown(button);     break;
+            }
 
-                if (controller.IsPressed(button))
-                    inputBinding.command->Execute(deltaTime);
-
-				break;
-
-             case InputType::Released:
-
-                if (controller.IsReleased(button))
-					inputBinding.command->Execute(deltaTime);
-
-                break;
-
-			 case InputType::Down:
-
-                 if (controller.IsDown(button))
-                     inputBinding.command->Execute(deltaTime);
-                 break;
+            if (shouldFire)
+            {
+                inputBinding.command->Execute(deltaTime);
+                if (!inputBinding.ignoreExclusiveGroup && inputBinding.exclusiveGroup >= 0)
+                    controllerFiredGroups.insert(inputBinding.exclusiveGroup);
             }
         }
     }
     return true;
 }
 
-void dae::InputManager::BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command, InputType inputType)
+void dae::InputManager::BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup, bool ignoreExclusiveGroup)
 {
-    m_KeyBindings.emplace(key, InputBinding{ inputType, std::move(command) });
+    m_KeyBindings.emplace(key, InputBinding{ inputType, std::move(command), exclusiveGroup, ignoreExclusiveGroup });
 }
 
 void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
@@ -110,10 +110,10 @@ void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
     m_KeyBindings.erase(key);
 }
 
-void dae::InputManager::BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType)
+void dae::InputManager::BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup, bool ignoreExclusiveGroup)
 {
     if (controllerIndex < 0 || controllerIndex >= static_cast<int>(m_ControllerBindings.size()))
         return;
 
-    m_ControllerBindings[controllerIndex].emplace(button, InputBinding{ inputType, std::move(command) });
+    m_ControllerBindings[controllerIndex].emplace(button, InputBinding{ inputType, std::move(command), exclusiveGroup, ignoreExclusiveGroup });
 }
