@@ -7,6 +7,6 @@ namespace dae
     {
     public:
         using PengoState::PengoState;
-        void OnEnter(PengoStateComponent& ctx) override;
+        void OnEnter(StateComponent& ctx, GameObject* gO) override;
     };
 }

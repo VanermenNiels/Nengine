@@ -8,18 +8,22 @@ endif()
 
 add_executable(${GAME_TARGET_NAME} ${GAME_TARGET_PARAM}
     Main.cpp
+    Scripts/Components/PengoStateComponent.cpp
+    Scripts/Components/PengoGridComponent.cpp
+    Scripts/Components/BlockComponent.cpp
     Scripts/States/PengoIdleState.cpp
     Scripts/States/PengoState.cpp
-    Scripts/PengoStateComponent.cpp
     Scripts/States/PengoWalkingStates.cpp
-    Scripts/States/PushingState.cpp)
+    Scripts/States/PushingState.cpp
+    Scripts/Level/LevelLoader.cpp
+    Scripts/Level/LevelManager.cpp)
 
 target_include_directories(${GAME_TARGET_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Scripts
     ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/States
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Components
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Level
 )
-
-target_link_libraries(${GAME_TARGET_NAME} PRIVATE Minigin)
 
 target_link_libraries(${GAME_TARGET_NAME} PRIVATE Minigin)
 

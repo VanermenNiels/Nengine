@@ -10,6 +10,8 @@ namespace dae
 	public:
 		ObserverComponent(GameObject* ownerRPtr, std::vector<EventId> reactsTo = {});
 
+		virtual ~ObserverComponent() = default;
+
 		void onNotify(GameObject*, Event event) override;
 
 		void AddObserver(Observer* o) { m_Subject.AddObserver(o); }

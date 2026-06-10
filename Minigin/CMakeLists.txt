@@ -32,14 +32,18 @@ add_library(Minigin STATIC
     Sound/ServiceLocator.cpp 
     Sound/SDLMixerSoundService.cpp 
     Observers/SoundObserver.cpp 
-    AnimatorComponent.cpp)
+    AnimatorComponent.cpp 
+    Components/GridComponent.cpp 
+    State.cpp 
+    Components/StateComponent.cpp)
 
 target_include_directories(Minigin PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${imgui_SOURCE_DIR}
     ${glm_SOURCE_DIR}
-    ${sdl3_mixer_BINARY_DIR}/include   # generated headers land here
-    ${sdl3_mixer_SOURCE_DIR}/include   # source headers as fallback
+    ${glm_SOURCE_DIR}/glm
+    ${sdl3_mixer_BINARY_DIR}/include
+    ${sdl3_mixer_SOURCE_DIR}/include
 )
 
 target_link_libraries(Minigin

@@ -105,4 +105,15 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, float x, float y, SD
 	SDL_RenderTexture(GetSDLRenderer(), texture.GetSDLTexture(), &src, &dst);
 }
 
+void dae::Renderer::RenderLine(float x1, float y1, float x2, float y2, SDL_Color color) const
+{
+	SDL_Color prev{};
+	SDL_GetRenderDrawColor(m_renderer, &prev.r, &prev.g, &prev.b, &prev.a);
+
+	SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderLine(m_renderer, x1, y1, x2, y2);
+
+	SDL_SetRenderDrawColor(m_renderer, prev.r, prev.g, prev.b, prev.a);
+}
+
 SDL_Renderer* dae::Renderer::GetSDLRenderer() const { return m_renderer; }

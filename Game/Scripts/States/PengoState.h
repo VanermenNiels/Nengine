@@ -1,19 +1,20 @@
 #pragma once
-
+#include "State.h"
 namespace dae
 {
-    class PengoStateComponent;
-
-    class PengoState
+	class GameObject;
+	class PengoState : public State
     {
     public:
         PengoState(int player = 0);
         virtual ~PengoState() = default;
 
-        virtual void OnEnter(PengoStateComponent& ctx) {};
-        virtual void OnExit(PengoStateComponent& ctx) {};
-        virtual void Update(PengoStateComponent& ctx, float deltaTime) {};
+        virtual void OnEnter(StateComponent& ctx, GameObject* gO) {};
+        virtual void OnExit(StateComponent& ctx, GameObject* gO) {};
+        virtual void Update(StateComponent& ctx, GameObject* gO, float deltaTime) {};
 
+        // To avoid a dynamic cast later on to check if the current state is pushing.
+        virtual bool IsPushing() const { return false; }
     protected:
 
         int m_StartCol{};

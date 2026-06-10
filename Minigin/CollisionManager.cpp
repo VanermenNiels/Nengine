@@ -20,6 +20,7 @@ void dae::CollisionManager::Update()
 		hb->ClearFrameOverlaps();
 	}
 
+	if (m_Hitboxes.size() < 2) return;
 	for (size_t h {}; h < m_Hitboxes.size() - 1; ++h)
 	{
 		auto hitbox { m_Hitboxes[h] };

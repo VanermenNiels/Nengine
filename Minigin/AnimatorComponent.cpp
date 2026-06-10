@@ -1,11 +1,10 @@
 #include "AnimatorComponent.h"
 #include "RenderComponent.h"
 #include "GameObject.h"
-#include "RenderComponent.h"
-#include <iostream>
 
-dae::AnimatorComponent::AnimatorComponent(GameObject* owner)
-    : BaseComponent(owner)
+dae::AnimatorComponent::AnimatorComponent(GameObject* owner, bool rowAnimation)
+    : BaseComponent(owner),
+      m_RowAnimation{rowAnimation}
 {
     m_RenderComponent = owner->GetComponent<RenderComponent>();
 }
@@ -34,7 +33,6 @@ void dae::AnimatorComponent::PlayAnimation(int startCol, int startRow, int frame
     m_SrcRect.h = frameHeight;
     m_SrcRect.x = (m_StartCol + m_CurrentFrame) * m_SrcRect.w;
     m_SrcRect.y = m_StartRow * m_SrcRect.h;
-    std::cout << m_SrcRect.y << " " << m_SrcRect.x << std::endl;
     
     m_RenderComponent->EnableSrcRect(m_SrcRect);
 }
@@ -55,14 +53,14 @@ void dae::AnimatorComponent::Update(float deltaTime)
             if (m_Loop)
                 m_CurrentFrame = 0;
             else
-                m_CurrentFrame = m_FrameCount; // freeze on last frame
+                m_CurrentFrame = m_FrameCount - 1; // freeze on last frame
         }
 
-        m_SrcRect.x = (m_StartCol + m_CurrentFrame) * m_SrcRect.w;
+        if (m_RowAnimation)
+            m_SrcRect.y = (m_StartRow + m_CurrentFrame) * m_SrcRect.h;
+        else
+            m_SrcRect.x = (m_StartCol + m_CurrentFrame) * m_SrcRect.w;
 
-        auto rect{ m_SrcRect };
-        rect.w -= 1;
-
-        m_RenderComponent->SetSrcRect(rect);
+        m_RenderComponent->SetSrcRect(m_SrcRect);
     }
 }

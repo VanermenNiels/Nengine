@@ -27,14 +27,12 @@ namespace dae::EventIDs
         make_sdbm_hash("HitP2")
     };
 
-    inline constexpr EventId ReadyPushIceBlock[2] =
+    inline constexpr EventId IceBlockPushed[2] =
     {
-        make_sdbm_hash("ReadyPushIceBlockP1"),
-        make_sdbm_hash("ReadyPushIceBlockP2")
+        make_sdbm_hash("PushIceBlockP1"),
+        make_sdbm_hash("PushIceBlockP2")
     };
     
-    inline constexpr EventId IceBlockPushed =
-        make_sdbm_hash("IceBlockPushed");
 
     inline constexpr EventId EnemyKilled =
         make_sdbm_hash("EnemyKilled");

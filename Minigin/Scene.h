@@ -22,6 +22,9 @@ namespace dae
 		Scene& operator=(const Scene& other) = delete;
 		Scene& operator=(Scene&& other) = delete;
 
+		bool IsActive() const { return m_IsActive; }
+		void SetActive(bool active) { m_IsActive = active; }
+
 	private:
 		friend class SceneManager;
 		explicit Scene() = default;
@@ -29,6 +32,8 @@ namespace dae
 		std::vector <std::unique_ptr<GameObject>> m_objects{};
 
 		std::vector<GameObject*> m_ObjectsToRemove{};
+
+		bool m_IsActive{};
 	};
 
 }
