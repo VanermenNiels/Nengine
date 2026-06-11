@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstddef>
 namespace dae
 {
     template <int length> struct sdbm_hash

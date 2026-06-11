@@ -37,6 +37,10 @@ add_library(Minigin STATIC
     State.cpp 
     Components/StateComponent.cpp)
 
+    if(EMSCRIPTEN)
+    target_compile_options(Minigin PRIVATE -fexceptions)
+    endif()
+
 target_include_directories(Minigin PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${imgui_SOURCE_DIR}

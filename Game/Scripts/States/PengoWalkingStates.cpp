@@ -8,6 +8,13 @@
 
 void dae::PengoWalkingState::OnEnter(StateComponent& ctx, GameObject* gO)
 {
+
+    glm::vec2 center = {
+    gO->GetWorldPosition().x + m_GridRPtr->GetCellSize() / 2.f,
+    gO->GetWorldPosition().y + m_GridRPtr->GetCellSize() / 2.f
+    };
+    m_CurrentCell = m_GridRPtr->WorldToCell(center);
+
     m_FrameCount = 2;
     m_FrameDuration = 0.1f;
     m_StartCol = static_cast<int>(m_Direction) * m_FrameCount;
@@ -89,6 +96,12 @@ void dae::PengoWalkingState::Update(StateComponent& ctx, GameObject* gO, float d
 
         if (m_MoveCommand)
             m_MoveCommand->Execute(deltaTime);
+
+        if (currentCell.row != m_CurrentCell.row || currentCell.col != m_CurrentCell.col)
+        {
+            m_GridRPtr->UpdatePlayerCell(&ctx, currentCell);
+            m_CurrentCell = currentCell;
+        }
 
         // align perpendicular axis to avoid drifting into side blocks
         auto cellTopLeft{ m_GridRPtr->CellToWorld(currentCell) };

@@ -23,5 +23,8 @@ void dae::PengoPushingState::OnExit(StateComponent& ctx, GameObject*)
 
 void dae::PengoPushingState::Push()
 {
-	m_BlockComp->Push(m_Direction);
+	if (m_BlockComp)
+		m_BlockComp->Push(m_Direction);
+
+	m_BlockComp = nullptr; // only push once per state, so reset block comp to prevent multiple pushes
 }

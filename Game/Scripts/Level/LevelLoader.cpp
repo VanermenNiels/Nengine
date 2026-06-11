@@ -6,10 +6,16 @@
 
 void dae::LevelLoader::GenerateAndSaveLevels(const std::string& filename, int levelCount, PengoGridComponent* grid)
 {
+#ifdef __EMSCRIPTEN__
+    (void)filename;
+    (void)levelCount;
+    (void)grid;
+    return; // Can't write to filesystem in WASM
+#else
     std::ofstream file(filename);
     if (!file.is_open())
         throw std::runtime_error("LevelLoader: could not open file for writing: " + filename);
-  
+
     for (int i{}; i < levelCount; ++i)
     {
         grid->GenerateLayout();
@@ -27,6 +33,7 @@ void dae::LevelLoader::GenerateAndSaveLevels(const std::string& filename, int le
             file << "\n";
         }
     }
+#endif
 }
 
 dae::SpawnData dae::LevelLoader::LoadLevel(const std::string& filename, int levelIndex, PengoGridComponent* grid)

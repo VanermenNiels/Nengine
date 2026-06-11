@@ -35,32 +35,32 @@ void dae::LevelManager::StartLevel()
     scene.Add(std::move(gridGO));
 
     dae::LevelLoader::GenerateAndSaveLevels("Data/levels.txt", 5, m_GridCompRPtr);
-    const auto& spawnData = dae::LevelLoader::LoadLevel("Data/levels.txt", m_CurrentLevel, m_GridCompRPtr);
+    const auto& spawnData = dae::LevelLoader::LoadLevel("Data/Levels.txt", m_CurrentLevel, m_GridCompRPtr);
 
     // --- WALLS ---
     const auto& bounds{ m_GridCompRPtr->GetBounds() };
     const float cellSize{ m_GridCompRPtr->GetCellSize() };
 
     auto wallGO = std::make_unique<dae::GameObject>();
-    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/HorizontalWall.png");
+    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/HorizontalWall.png");
     wallGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 416, 16, 1, 0.1f, false);
     wallGO->SetPosition(bounds[0].x + cellSize, bounds[0].y + cellSize / 2);
     scene.Add(std::move(wallGO));
 
     wallGO = std::make_unique<dae::GameObject>();
-    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/HorizontalWall.png");
+    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/HorizontalWall.png");
     wallGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 416, 16, 1, 0.1f, false);
     wallGO->SetPosition(bounds[2].x + cellSize, bounds[2].y - cellSize);
     scene.Add(std::move(wallGO));
 
     wallGO = std::make_unique<dae::GameObject>();
-    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/VerticalWall.png");
+    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/VerticalWall.png");
     wallGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 16, 512, 1, 0.1f, false);
     wallGO->SetPosition(bounds[0].x + cellSize / 2, bounds[0].y + cellSize / 2);
     scene.Add(std::move(wallGO));
 
     wallGO = std::make_unique<dae::GameObject>();
-    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/VerticalWall.png");
+    wallGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/VerticalWall.png");
     wallGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 16, 512, 1, 0.1f, false);
     wallGO->SetPosition(bounds[1].x - cellSize, bounds[1].y + cellSize / 2);
     scene.Add(std::move(wallGO));
@@ -79,7 +79,7 @@ void dae::LevelManager::StartLevel()
         case dae::CellType::IceBlock:
         {
             auto cellGO = std::make_unique<dae::GameObject>();
-            cellGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/IceBlocks.png");
+            cellGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/IceBlocks.png");
             cellGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 32, 32, 1, 0.1f, false);
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
@@ -92,7 +92,7 @@ void dae::LevelManager::StartLevel()
         case dae::CellType::EggBlock:
         {
             auto cellGO = std::make_unique<dae::GameObject>();
-            cellGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/IceBlocks.png");
+            cellGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/IceBlocks.png");
             cellGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 32, 32, 1, 0.1f, false);
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
@@ -106,7 +106,7 @@ void dae::LevelManager::StartLevel()
         case dae::CellType::DiamondBlock:
         {
             auto cellGO = std::make_unique<dae::GameObject>();
-            cellGO->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/IceBlocks.png");
+            cellGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/IceBlocks.png");
             cellGO->AddComponent<dae::AnimatorComponent>(true)->PlayAnimation(0, 1, 32, 32, 2, 0.1f);
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
@@ -125,7 +125,7 @@ void dae::LevelManager::StartLevel()
     // --- PLAYER 1 ---
     auto player1 = std::make_unique<dae::GameObject>();
     player1->SetPosition(playerSpawnPos.x, playerSpawnPos.y);
-    player1->AddComponent<dae::RenderComponent>()->SetTexture("Spritesheets/PengoCharactersSprites.png");
+    player1->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites.png");
     player1->AddComponent<dae::AnimatorComponent>();
     player1->SetTag(dae::Tags::Player);
 

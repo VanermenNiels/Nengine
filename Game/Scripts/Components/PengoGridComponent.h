@@ -8,6 +8,7 @@
 namespace dae
 {
 	class BlockComponent;
+	class StateComponent;
     class PengoGridComponent final : public GridComponent
     {
     public:
@@ -33,9 +34,13 @@ namespace dae
 
         void SetGrid(const std::vector<std::vector<CellType>>& grid) { m_Grid = grid; }
         void SetCellType(Cell oldCell,Cell newCell, CellType type);
+
         void AddBlockComponent(Cell cell, BlockComponent* component) { m_BlockComponents.push_back({cell, component}); }
+		void AddPlayer(Cell cell, StateComponent* player) { m_PlayerStateComponents.push_back({cell, player}); }
+        void UpdatePlayerCell(StateComponent* player, Cell newCell);
 
         BlockComponent* GetBlockComponentAtCell(Cell cell) const;
+        StateComponent* GetStateComponentAtCell(Cell cell) const;
 
         void RemoveBlockComponent(GridComponent::Cell cell);
 
@@ -54,5 +59,6 @@ namespace dae
         std::vector<glm::vec2> m_CarvingSequence;
 
         std::vector<std::pair<Cell, BlockComponent*>> m_BlockComponents{};
+        std::vector<std::pair<Cell, StateComponent*>> m_PlayerStateComponents{};
     };
 }

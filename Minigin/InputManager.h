@@ -6,8 +6,11 @@
 #include <vector>
 #include <set>
 #include "Commands/Command.h"
-#include "ControllerInput.h"
 #include <array>
+
+#ifndef __EMSCRIPTEN__
+#include "ControllerInput.h"
+#endif
 
 namespace dae
 {
@@ -27,7 +30,9 @@ namespace dae
         void BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup = -1, bool ignoreExclusiveGroup = false);
         void UnBindKeyboardCommand(SDL_Keycode key);
 
+#ifndef __EMSCRIPTEN__
         void BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup = -1, bool ignoreExclusiveGroup = false);
+#endif
 
     private:
         struct InputBinding
@@ -40,11 +45,11 @@ namespace dae
 
         std::unordered_multimap<SDL_Keycode, InputBinding> m_KeyBindings;
 
+#ifndef __EMSCRIPTEN__
         std::vector<ControllerInput> m_Controllers;
-
         static const int MAX_CONTROLLERS{ 4 };
-
         std::array<std::multimap<WORD, InputBinding>, MAX_CONTROLLERS> m_ControllerBindings;
+#endif
 
         std::vector<bool> m_PreviousKeyboardState;
     };

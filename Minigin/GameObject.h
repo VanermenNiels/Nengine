@@ -127,21 +127,21 @@ namespace dae
 		template<typename ComponentType>
 		bool RemoveAllComponents()
 		{
-			auto target { m_ComponentRPtrUMap.find(typeid(ComponentType)) };
+			auto target{ m_ComponentRPtrUMap.find(typeid(ComponentType)) };
 			if (target == m_ComponentRPtrUMap.end())
 				return false;
 
-			auto isSameType = [typeIndex = typeid(ComponentType)](const std::unique_ptr<BaseComponent>& ptr) 
-			{
-				return typeid(*ptr) == typeIndex;
-			};
-			m_ComponentsUPtrVec.erase(std::remove_if( m_ComponentsUPtrVec.begin(), 
-													  m_ComponentsUPtrVec.end(),
-													  isSameType ),
-									  m_ComponentsUPtrVec.end());
+			std::vector<BaseComponent*> toRemove(target->second.begin(), target->second.end());
+
+			m_ComponentsUPtrVec.erase(
+				std::remove_if(m_ComponentsUPtrVec.begin(), m_ComponentsUPtrVec.end(),
+					[&toRemove](const std::unique_ptr<BaseComponent>& ptr)
+					{
+						return std::find(toRemove.begin(), toRemove.end(), ptr.get()) != toRemove.end();
+					}),
+				m_ComponentsUPtrVec.end());
 
 			m_ComponentRPtrUMap.erase(target);
-
 			return true;
 		}
 

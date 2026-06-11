@@ -182,9 +182,31 @@ void dae::PengoGridComponent::SetCellType(Cell oldCell, Cell newCell, CellType t
     }
 }
 
+void dae::PengoGridComponent::UpdatePlayerCell(StateComponent* player, Cell newCell)
+{
+	for (auto& [compCell, component] : m_PlayerStateComponents)
+	{
+		if (component == player)
+		{
+			compCell = newCell;
+			break;
+		}
+	}
+}
+
 dae::BlockComponent* dae::PengoGridComponent::GetBlockComponentAtCell(Cell cell) const
 {
     for (const auto& [compCell, component] : m_BlockComponents)
+    {
+        if (compCell.row == cell.row && compCell.col == cell.col)
+            return component;
+    }
+    return nullptr;
+}
+
+dae::StateComponent* dae::PengoGridComponent::GetStateComponentAtCell(Cell cell) const
+{
+    for (const auto& [compCell, component] : m_PlayerStateComponents)
     {
         if (compCell.row == cell.row && compCell.col == cell.col)
             return component;

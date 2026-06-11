@@ -3,6 +3,7 @@
 #include "../Variables.h"
 #include "Commands/MoveCommand.h"
 #include <memory>
+#include "Components/GridComponent.h"
 
 namespace dae
 {
@@ -22,5 +23,6 @@ namespace dae
         float m_Speed{ 200.f };
         std::unique_ptr<MoveCommand> m_MoveCommand{};
 		PengoGridComponent* m_GridRPtr{};
+		GridComponent::Cell m_CurrentCell{};
     };
 }

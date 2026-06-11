@@ -1,4 +1,6 @@
 #pragma once
+
+#ifndef __EMSCRIPTEN__
 #include <windows.h>
 #include <memory>
 
@@ -31,3 +33,5 @@ namespace dae
         std::unique_ptr<Impl> m_ControllerInput;
 	};
 }
+
+#endif

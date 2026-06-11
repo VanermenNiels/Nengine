@@ -12,7 +12,7 @@ namespace dae
 		explicit Minigin(const std::filesystem::path& dataPath, int maxFrameRate = 60);
 		~Minigin();
 		void Run(const std::function<void()>& load);
-		void RunOneFrame(std::chrono::steady_clock::time_point& lastTime);
+		void RunOneFrame();
 
 		Minigin(const Minigin& other) = delete;
 		Minigin(Minigin&& other) = delete;
@@ -22,5 +22,6 @@ namespace dae
 	private:
 		bool m_quit{};
 		float m_MillisecondsBetweenFrames{};
+		std::chrono::steady_clock::time_point m_LastTime{};
 	};
 }

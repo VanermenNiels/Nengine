@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 #include "ControllerInput.h"
 #include <Xinput.h>
 
@@ -51,3 +52,5 @@ bool dae::ControllerInput::IsDown(WORD button) const
 {
 	return (m_ControllerInput->state.Gamepad.wButtons & button) != 0;
 }
+
+#endif

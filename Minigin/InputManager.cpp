@@ -5,11 +5,12 @@
 
 void dae::InputManager::InitializeControllers()
 {
+#ifndef __EMSCRIPTEN__
     m_Controllers.clear();
     m_Controllers.reserve(MAX_CONTROLLERS);
-
     for (int c{}; c < MAX_CONTROLLERS; ++c)
         m_Controllers.emplace_back(c);
+#endif
 }
 
 bool dae::InputManager::ProcessInput(float deltaTime)
@@ -19,11 +20,9 @@ bool dae::InputManager::ProcessInput(float deltaTime)
     {
         if (e.type == SDL_EVENT_QUIT)
             return false;
-
         ImGui_ImplSDL3_ProcessEvent(&e);
     }
 
-    // --- Keyboard ---
     int numKeys{};
     const bool* keyboardState = SDL_GetKeyboardState(&numKeys);
 
@@ -63,7 +62,7 @@ bool dae::InputManager::ProcessInput(float deltaTime)
 
     std::copy(keyboardState, keyboardState + numKeys, m_PreviousKeyboardState.begin());
 
-    // --- Controllers ---
+#ifndef __EMSCRIPTEN__
     for (int c{}; c < static_cast<int>(m_Controllers.size()); ++c)
     {
         auto& controller = m_Controllers[c];
@@ -97,6 +96,7 @@ bool dae::InputManager::ProcessInput(float deltaTime)
             }
         }
     }
+#endif
     return true;
 }
 
@@ -110,6 +110,7 @@ void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
     m_KeyBindings.erase(key);
 }
 
+#ifndef __EMSCRIPTEN__
 void dae::InputManager::BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup, bool ignoreExclusiveGroup)
 {
     if (controllerIndex < 0 || controllerIndex >= static_cast<int>(m_ControllerBindings.size()))
@@ -117,3 +118,4 @@ void dae::InputManager::BindControllerCommand(int controllerIndex, WORD button, 
 
     m_ControllerBindings[controllerIndex].emplace(button, InputBinding{ inputType, std::move(command), exclusiveGroup, ignoreExclusiveGroup });
 }
+#endif

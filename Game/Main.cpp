@@ -15,7 +15,6 @@
 #include "InputManager.h"
 #include "Commands/MoveCommand.h"
 #include "Commands/EventCommand.h"
-#include <Xinput.h>
 #include "Observers/ScoreDisplay.h"
 #include "Observers/HealthDisplay.h"
 #include "Observers/SoundObserver.h"
@@ -71,7 +70,7 @@ static void load()
 int main(int, char* [])
 {
 #if __EMSCRIPTEN__
-    fs::path data_location = "";
+    fs::path data_location = "Data/";
 #else
     fs::path data_location = "./Data/";
     if (!fs::exists(data_location))
@@ -79,13 +78,17 @@ int main(int, char* [])
 #endif
     dae::Minigin engine(data_location);
 
+#ifndef __EMSCRIPTEN__
     auto soundService = std::make_unique<dae::SDLMixerSoundService>();
     dae::ServiceLocator::RegisterSoundService(soundService.get());
+#endif
 
     engine.Run(load);
 
+#ifndef __EMSCRIPTEN__
     dae::ServiceLocator::RegisterSoundService(nullptr);
     soundService.reset();
+#endif
 
     return 0;
 }
