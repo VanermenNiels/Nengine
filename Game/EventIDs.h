@@ -36,4 +36,9 @@ namespace dae::EventIDs
 
     inline constexpr EventId EnemyKilled =
         make_sdbm_hash("EnemyKilled");
+    inline constexpr EventId EggDestroyed =
+        make_sdbm_hash("EggDestroyed");
+
+    inline constexpr EventId EnemyHit = 
+        make_sdbm_hash("EnemyHit");
 }

@@ -1,11 +1,52 @@
 #include "EnemyStateComponent.h"
 #include "AnimatorComponent.h"
 #include "GameObject.h"
+#include "States/Enemies/EnemySpawnState.h"
+#include "States/Enemies/EnemyWalkingState.h"
+#include <memory>
+#include "../EventIDs.h"
 
-dae::EnemyStateComponent::EnemyStateComponent(GameObject* owner, PengoGridComponent* grid, std::vector<EventId> eventIds):
+int dae::EnemyStateComponent::ENEMIES_ON_FIELD { 3 };
+int dae::EnemyStateComponent::ENEMIES_IN_EGG { 3 };
+
+std::vector<dae::EnemyStateComponent*> dae::EnemyStateComponent::ENEMIES{};
+
+dae::EnemyStateComponent::EnemyStateComponent(GameObject* owner, PengoGridComponent* grid, bool inEgg, std::vector<EventId> eventIds) :
 	StateComponent(owner, eventIds),
-	m_GridRPtr{grid}
-{}
+	m_GridRPtr { grid },
+	m_InEgg { inEgg }
+{
+	ENEMIES.push_back(this);
+
+	if (inEgg)
+		GetAnimatorComp()->PlayAnimation(0, 0, 0, 0, 0, 0.f); // Enemy stays dormant
+	else SpawnEnemy();
+}
+
+dae::EnemyStateComponent::~EnemyStateComponent()
+{
+	if (!m_InEgg)
+	{
+		--ENEMIES_IN_EGG;
+		if (ENEMIES_IN_EGG > 0) ++ENEMIES_ON_FIELD;
+	}
+	else --ENEMIES_IN_EGG;
+}
+
+void dae::EnemyStateComponent::SpawnEnemy()
+{
+	SetState(std::make_unique<EnemySpawnState>());
+	m_InEgg = false;
+}
+
+void dae::EnemyStateComponent::StartMoving()
+{
+	int enemiesAlive{ GetEnemiesAlive() };
+	if (enemiesAlive < 2);
+	else if (enemiesAlive <= 3);
+	else SetState(std::make_unique<EnemyWalkingState>(m_CurrentDir, m_GridRPtr));
+
+}
 
 dae::AnimatorComponent* dae::EnemyStateComponent::GetAnimatorComp()
 {
@@ -14,5 +55,5 @@ dae::AnimatorComponent* dae::EnemyStateComponent::GetAnimatorComp()
 
 void dae::EnemyStateComponent::EventReaction(Event)
 {
-
+	
 }

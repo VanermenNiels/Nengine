@@ -16,11 +16,12 @@ namespace dae
         void Update(float deltaTime) override;
 
         void SetSpriteSheet(const std::string& filename, int frameWidth, int frameHeight);
-        void PlayAnimation(int startCol, int startRow, int frameWidth, int frameHeight, int frameCount, float frameDuration, bool loop = true);
+        void PlayAnimation(int startCol, int startRow, int frameWidth, int frameHeight, int frameCount, float frameDuration, 
+                            bool loop = true, bool freezeLastFrame = true, int amountOfTimesToPlay = 1);
 
         void SetRowAnimation(bool newRowAnimation) { m_RowAnimation = newRowAnimation; }
 
-        bool AnimationFinished() const { return !m_Loop && m_CurrentFrame >= m_FrameCount - 1; }
+        bool AnimationFinished() const;
 
     private:
         RenderComponent* m_RenderComponent{};
@@ -32,6 +33,10 @@ namespace dae
         int   m_FrameCount{};
         float m_FrameDuration{};
         bool  m_Loop{};
+        bool  m_FreezeLastFrame{};
+
+        int   m_TimesPlayed{};
+        int   m_AmountOfTimesToPlay{};
 
         int   m_CurrentFrame{};
         float m_AccumulatedTime{};

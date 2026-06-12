@@ -10,11 +10,13 @@
 #include "RenderComponent.h"
 #include "InputManager.h"
 #include "PengoStateComponent.h"
+#include "EnemyStateComponent.h"
 #include "../EventIDs.h"
 #include "Tags.h"
 #include "HealthComponent.h"
 #include "Commands/EventCommand.h"
 #include "Components/BlockComponent.h"
+#include "HitboxComponent.h"
 
 
 void dae::LevelManager::StartLevel()
@@ -75,15 +77,31 @@ void dae::LevelManager::StartLevel()
         case dae::CellType::PlayerSpawn:
             playerSpawnPos = data.position;
             break;
+        case dae::CellType::EnemySpawn:
+        {
+            auto enemyGO = std::make_unique<dae::GameObject>();
+            enemyGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
+            enemyGO->AddComponent<dae::AnimatorComponent>();
+            enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, false);
+            enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, false);
+            enemyGO->AddComponent<dae::HitboxComponent>(32, 32);
 
+            enemyGO->SetPosition(data.position.x, data.position.y);
+
+            m_GridCompRPtr->AddEnemyObject(enemyGO.get());
+
+            scene.Add(std::move(enemyGO));
+            break;
+        }
         case dae::CellType::IceBlock:
         {
             auto cellGO = std::make_unique<dae::GameObject>();
             cellGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/IceBlocks.png");
             cellGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 32, 32, 1, 0.1f, false);
+            cellGO->AddComponent<dae::HitboxComponent>(32, 32);
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
-            m_GridCompRPtr->AddBlockComponent( cell ,cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
+            m_GridCompRPtr->AddBlockComponent(cell, cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
 
             cellGO->SetPosition(data.position.x, data.position.y);
             scene.Add(std::move(cellGO));
@@ -93,12 +111,14 @@ void dae::LevelManager::StartLevel()
         {
             auto cellGO = std::make_unique<dae::GameObject>();
             cellGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/IceBlocks.png");
-            cellGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 32, 32, 1, 0.1f, false);
+            cellGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(0, 0, 32, 32, 2, 0.1f, false, false, 6);
+            cellGO->AddComponent<dae::HitboxComponent>(32, 32);
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
             m_GridCompRPtr->AddBlockComponent(cell, cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
 
             cellGO->SetPosition(data.position.x, data.position.y);
+
             scene.Add(std::move(cellGO));
             break;
         }
@@ -108,6 +128,7 @@ void dae::LevelManager::StartLevel()
             auto cellGO = std::make_unique<dae::GameObject>();
             cellGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/IceBlocks.png");
             cellGO->AddComponent<dae::AnimatorComponent>(true)->PlayAnimation(0, 1, 32, 32, 2, 0.1f);
+            cellGO->AddComponent<dae::HitboxComponent>(32, 32);
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
             m_GridCompRPtr->AddBlockComponent(cell, cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
@@ -125,14 +146,17 @@ void dae::LevelManager::StartLevel()
     // --- PLAYER 1 ---
     auto player1 = std::make_unique<dae::GameObject>();
     player1->SetPosition(playerSpawnPos.x, playerSpawnPos.y);
-    player1->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites.png");
+    player1->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
     player1->AddComponent<dae::AnimatorComponent>();
     player1->SetTag(dae::Tags::Player);
 
     auto stateComp1 = player1->AddComponent<dae::PengoStateComponent>(
-            m_GridCompRPtr, std::vector<dae::EventId>{ dae::EventIDs::PlayerMoved[0], dae::EventIDs::PlayerStop[0], dae::EventIDs::IceBlockPushed[0] }, 0);
+        m_GridCompRPtr, std::vector<dae::EventId>{ dae::EventIDs::PlayerMoved[0], dae::EventIDs::PlayerStop[0], dae::EventIDs::IceBlockPushed[0] }, 0);
 
     player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>{ dae::make_sdbm_hash("Damage") });
+
+    // NEW: register this player with the grid so GetPlayerCells() isn't empty
+    m_GridCompRPtr->AddPlayerObject(player1.get());
 
     inputManager.BindKeyboardCommand(SDLK_W,
         std::make_unique<dae::EventCommand>(player1.get(), stateComp1, dae::EventIDs::PlayerMoved[0], static_cast<int>(dae::Direction::Up)),

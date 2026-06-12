@@ -32,10 +32,6 @@ dae::HitboxComponent::~HitboxComponent()
 	CollisionManager::GetInstance().UnregisterHitbox(this);
 }
 
-void dae::HitboxComponent::Update(float)
-{
-
-}
 
 dae::Rectf dae::HitboxComponent::GetWorldRect()
 {

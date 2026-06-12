@@ -3,6 +3,11 @@
 #include "GameObject.h"
 #include "PengoGridComponent.h"
 #include "AnimatorComponent.h"
+#include "HitboxComponent.h"
+#include "../EventIDs.h"
+#include "EnemyStateComponent.h"
+#include "States/Enemies/EnemyPushedState.h"
+#include "States/Enemies/EnemySquishedState.h"
 
 const float dae::BlockComponent::SPEED { 400.f };
 
@@ -10,10 +15,16 @@ void dae::BlockComponent::Update(float deltaTime)
 {
 	if (m_AnimatorRPtr)
 	{
-		m_AnimatorRPtr->Update(deltaTime);
 		if (m_AnimatorRPtr->AnimationFinished())
 		{
-			GetOwner()->MarkForDeletion();
+            if (m_Type == CellType::EggBlock)
+            {
+                m_Subject.Notify(GetOwner(), Event(EventIDs::EggDestroyed));
+                m_AnimatorRPtr->PlayAnimation(0, 5, 32, 32, 3, 0.2f, false);
+                m_Type = CellType::EnemySpawn; //make sure we don't enter this if statement again.
+            }
+            else m_AnimatorRPtr->SetEnabled(false);
+			if (!m_AnimatorRPtr->IsEnabled()) GetOwner()->MarkForDeletion();
 		}
 		return;
 	}
@@ -58,7 +69,11 @@ void dae::BlockComponent::Update(float deltaTime)
         m_GridRPtr->SetCellType(m_CurrentCell, currentCell, m_Type);
         m_CurrentCell = currentCell;
 
+        if (m_CurrentGrabbedEnemy)
+            m_CurrentGrabbedEnemy->SetState(std::make_unique<EnemySquishedState>(m_CurrentDir));
         m_MoveCommand.reset();
+        m_EnemyStateComponents.clear();
+        m_EnemyHitboxes.clear();
 		m_CurrentDir = Direction::Static;
         return;
     }
@@ -66,6 +81,35 @@ void dae::BlockComponent::Update(float deltaTime)
     {
         m_MoveCommand->Execute(deltaTime);
 
+        for (int h{}; h < m_EnemyHitboxes.size(); ++h)
+        {
+            if (m_EnemyHitboxes[h]->Overlaps(m_Hitbox))
+            {
+                m_EnemyStateComponents[h]->SetBeingPushed();
+
+                auto pos{ m_GridRPtr->CellToWorld(currentCell) };
+                switch (m_CurrentDir)
+                {
+                case Direction::Down:
+                    pos.y += fullCell;
+                    break;
+                case Direction::Left:
+                    pos.x -= fullCell;
+                    break;
+                case Direction::Up:
+                    pos.y -= fullCell;
+                    break;
+                case Direction::Right:
+                    pos.x += fullCell;
+                    break;
+                default: break;
+
+                }
+                m_CurrentGrabbedEnemy = m_EnemyStateComponents[h];
+                m_CurrentGrabbedEnemy->SetState(std::make_unique<EnemyPushedState>(pos, m_CurrentDir, SPEED, m_GridRPtr));
+            }
+
+        }
         // keep grid in sync as block crosses cell boundaries
         if (currentCell.row != m_CurrentCell.row || currentCell.col != m_CurrentCell.col)
         {
@@ -100,12 +144,19 @@ void dae::BlockComponent::Push(Direction dir)
          blockAhead == CellType::VerticalWall) &&
          m_Type != CellType::DiamondBlock)
     {
-        m_AnimatorRPtr = GetOwner()->GetComponent<AnimatorComponent>();
-        m_AnimatorRPtr->PlayAnimation(0, 3, 32, 32, 8, 0.2f, false);
-        m_GridRPtr->RemoveBlockComponent(m_CurrentCell);
+        Destroy();
         return;
     }
 
+    m_Hitbox = GetOwner()->GetComponent<HitboxComponent>();
+    for (auto enemyGO : m_GridRPtr->GetEnemies())
+    {
+        auto stateComp{ enemyGO->GetComponent<EnemyStateComponent>() };
+        if (stateComp->BeingPushed()) continue;
+
+        m_EnemyStateComponents.push_back(stateComp);
+        m_EnemyHitboxes.push_back(enemyGO->GetComponent<HitboxComponent>());
+    }
     constexpr glm::vec3 dirVectors[] = {
         { 0,  1, 0 },  // Down
         { -1, 0, 0 },  // Left
@@ -119,4 +170,11 @@ void dae::BlockComponent::Push(Direction dir)
         dirVectors[static_cast<int>(dir)],
         SPEED
     );
+}
+
+void dae::BlockComponent::Destroy()
+{
+    m_AnimatorRPtr = GetOwner()->GetComponent<AnimatorComponent>();
+    m_AnimatorRPtr->PlayAnimation(0, 3, 32, 32, 8, 0.1f, false);
+    m_GridRPtr->RemoveBlockComponent(m_CurrentCell);
 }

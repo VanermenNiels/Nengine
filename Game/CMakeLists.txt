@@ -21,8 +21,10 @@ add_executable(${GAME_TARGET_NAME} ${GAME_TARGET_PARAM}
     Scripts/States/Enemies/EnemyWalkingState.cpp
     Scripts/States/Enemies/EnemyPunchingState.cpp 
     Scripts/States/Enemies/EnemyRunningState.cpp 
-    Scripts/States/Enemies/EnemySquished.cpp 
-    Scripts/States/Enemies/EnemyState..cpp)
+    Scripts/States/Enemies/EnemySquishedState.cpp 
+    Scripts/States/Enemies/EnemyState.cpp 
+    Scripts/Level/EnemyManager.cpp 
+    Scripts/States/Enemies/EnemyPushedState.cpp)
 
 target_include_directories(${GAME_TARGET_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Scripts

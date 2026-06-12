@@ -19,8 +19,6 @@ namespace dae
 		HitboxComponent(GameObject* owner, float width, float height, float offsetX = 0.f, float offsetY = 0.f);
 
 		~HitboxComponent();
-
-		void Update(float) override;
 		
 		Rectf GetWorldRect();
 		bool  Overlaps(HitboxComponent* other);
@@ -50,6 +48,5 @@ namespace dae
 		std::vector<GameObject*> m_PreviousOverlaps{};
 
 
-		static std::vector<HitboxComponent> sm_AllHitboxes;
 	};
 }
