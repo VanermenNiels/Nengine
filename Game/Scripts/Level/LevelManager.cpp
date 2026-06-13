@@ -90,6 +90,7 @@ void dae::LevelManager::StartLevel()
             enemyGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
             enemyGO->AddComponent<dae::AnimatorComponent>();
             auto state{ enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, false) };
+            enemyGO->SetTag(Tags::Enemy);
             enemyGO->AddComponent<dae::HitboxComponent>(32, 32);
 
             enemyGO->SetPosition(data.position.x, data.position.y);
@@ -172,12 +173,20 @@ void dae::LevelManager::StartLevel()
     player1->SetPosition(playerSpawnPos.x, playerSpawnPos.y);
     player1->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
     player1->AddComponent<dae::AnimatorComponent>();
+
     player1->SetTag(dae::Tags::Player);
 
     auto stateComp1 = player1->AddComponent<dae::PengoStateComponent>(
         m_GridCompRPtr, std::vector<dae::EventId>{ dae::EventIDs::PlayerMoved[0], dae::EventIDs::PlayerStop[0], dae::EventIDs::IceBlockPushed[0] }, 0);
 
-    player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>{ dae::make_sdbm_hash("Damage") });
+    auto health = player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>{ EventIDs::PlayerHit[0] });
+    auto playerHitbox = player1->AddComponent<dae::HitboxComponent>(
+        dae::Event{ dae::EventIDs::PlayerHit[0] },  // beginOEvent fires PlayerHit
+        dae::Event{},                                 // no endOEvent needed
+        32, 32
+    );
+    playerHitbox->AddObserver(health);  // health reacts to PlayerHit
+    playerHitbox->SetTargetTags(Tags::Enemy);
 
     // NEW: register this player with the grid so GetPlayerCells() isn't empty
     m_GridCompRPtr->AddPlayerObject(player1.get());

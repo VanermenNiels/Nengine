@@ -9,7 +9,7 @@ dae::HealthComponent::HealthComponent(GameObject* owner, int health, std::vector
 
 void dae::HealthComponent::EventReaction(Event event)
 {
-	int amount{ (event.nbArgs > 0) ? event.args[0].intVal : 1 };
+	int amount{ (event.nbArgs > 0) ? event.args[0].intVal : -1 };
 	m_Health += amount;
 
 	if (m_Health > m_MaxHealth)
