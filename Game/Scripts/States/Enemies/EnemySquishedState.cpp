@@ -19,6 +19,6 @@ void dae::EnemySquishedState::Update(StateComponent& ctx, GameObject* gO, float 
     if (static_cast<EnemyStateComponent&>(ctx).GetAnimatorComp()->AnimationFinished())
     {
         static_cast<EnemyStateComponent&>(ctx).GetAnimatorComp()->PlayAnimation(0, 0, 0, 0, 0, 0);
-        static_cast<EnemyStateComponent&>(ctx).SetDead();
+        static_cast<EnemyStateComponent&>(ctx).RemoveGO();
     }
 }

@@ -121,7 +121,7 @@ dae::SpawnData dae::PengoGridComponent::GenerateLayout()
 
     std::shuffle(emptyCells.begin(), emptyCells.end(), m_Rng);
 
-    if (!emptyCells.empty())
+    for (int i{}; i < 2 && !emptyCells.empty(); ++i)
     {
         m_Grid[emptyCells[0].row][emptyCells[0].col] = CellType::PlayerSpawn;
         emptyCells.erase(emptyCells.begin());

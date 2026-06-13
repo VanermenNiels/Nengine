@@ -46,6 +46,7 @@ void dae::EnemyStateComponent::StartMoving()
 void dae::EnemyStateComponent::SetDead()
 {
 	m_Dead = true;
+	//GetOwner()->MarkForDeletion();
 	if (!m_InEgg)
 		m_GridRPtr->RemoveEnemyObject(GetOwner());
 }

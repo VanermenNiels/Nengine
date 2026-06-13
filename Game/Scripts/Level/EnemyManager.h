@@ -20,6 +20,8 @@ namespace dae
         void AddEnemyInEgg(EnemyStateComponent* enemy, BlockComponent* block);
         void AddGrid(PengoGridComponent* grid) { m_GridRPtr = grid; }
 
+        bool AllEnemiesDead() { return m_EnemiesOnFieldVec.size() <= 0; }
+
     protected:
         void EventReaction(Event event) override;
 

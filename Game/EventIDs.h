@@ -41,4 +41,12 @@ namespace dae::EventIDs
 
     inline constexpr EventId EnemyHit = 
         make_sdbm_hash("EnemyHit");
+
+    inline constexpr EventId StartMultiplayer = 
+        make_sdbm_hash("StartMultiplayer");
+
+    inline constexpr EventId StartSingleplayer =
+        make_sdbm_hash("StartSingleplayer");
+
+
 }

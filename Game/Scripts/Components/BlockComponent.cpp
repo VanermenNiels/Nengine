@@ -72,6 +72,7 @@ void dae::BlockComponent::Update(float deltaTime)
             for (auto enemy : m_CurrentGrabbedEnemies)
             {
                 enemy->SetState(std::make_unique<EnemySquishedState>(m_CurrentDir));
+                enemy->SetDead();
             }
             m_Subject.Notify(GetOwner(), Event{ EventIDs::EnemyKilled });
         }
@@ -89,10 +90,11 @@ void dae::BlockComponent::Update(float deltaTime)
         if (m_EnemyMoveCommand)
             m_EnemyMoveCommand->Execute(deltaTime);
 
-        for (int h{}; h < (int)m_EnemyHitboxes.size(); ++h)
+        for (int h{}; h < static_cast<int>(m_EnemyHitboxes.size()); ++h)
         {
             if (m_EnemyHitboxes[h]->Overlaps(m_Hitbox))
             {
+                m_EnemyHitboxes[h]->SetEnabled(false);
                 m_EnemyStateComponents[h]->SetBeingPushed();
 
                 auto pos{ m_GridRPtr->CellToWorld(currentCell) };

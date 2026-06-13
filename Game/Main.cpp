@@ -30,16 +30,10 @@
 #include "Variables.h"
 #include "Scripts/Level/LevelLoader.h"
 #include "Scripts/Components/PengoGridComponent.h"
-
 #include "Scripts/Level/LevelManager.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
-
-constexpr int PLAYER1_MOVE_GROUP = 0;
-constexpr int PLAYER1_ANIM_GROUP = 2;
-constexpr int PLAYER2_MOVE_GROUP = 1;
-constexpr int PLAYER2_ANIM_GROUP = 3;
 
 static void load()
 {
@@ -47,24 +41,18 @@ static void load()
     auto& inputManager = dae::InputManager::GetInstance();
     inputManager.InitializeControllers();
 
-    constexpr auto SCORE_EVENT = dae::make_sdbm_hash("AddScore");
-    constexpr auto DAMAGE_EVENT = dae::make_sdbm_hash("Damage");
-    constexpr auto OVERLAP_EVENT = dae::make_sdbm_hash("OnOverlapBegin");
-    constexpr auto OVERLAP_END_EVENT = dae::make_sdbm_hash("OnOverlapEnd");
+    auto levelManagerGO = std::make_unique<dae::GameObject>();
+    auto levelManager = levelManagerGO->AddComponent<dae::LevelManager>(
+        std::vector<dae::EventId>{ dae::EventIDs::StartSingleplayer, dae::EventIDs::StartMultiplayer });
+    scene.Add(std::move(levelManagerGO));
 
-    dae::Event beginOE{ OVERLAP_EVENT };
-    beginOE.args[0].intVal = -1;
-    beginOE.nbArgs = 1;
+    inputManager.BindKeyboardCommand(SDLK_1,
+        std::make_unique<dae::EventCommand>(nullptr, levelManager, dae::EventIDs::StartSingleplayer, 0),
+        dae::InputManager::InputType::Pressed);
 
-    dae::Event endOE{ OVERLAP_END_EVENT };
-    endOE.args[0].intVal = 10;
-    endOE.nbArgs = 1;
-
-    // --- LOGO ---
-    auto LevelManager = std::make_unique<dae::GameObject>();
-    LevelManager->AddComponent<dae::LevelManager>()->StartLevel();
-    scene.Add(std::move(LevelManager));
-
+    inputManager.BindKeyboardCommand(SDLK_2,
+        std::make_unique<dae::EventCommand>(nullptr, levelManager, dae::EventIDs::StartMultiplayer, 0),
+        dae::InputManager::InputType::Pressed);
 }
 
 int main(int, char* [])

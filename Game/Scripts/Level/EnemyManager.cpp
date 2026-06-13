@@ -4,6 +4,7 @@
 #include "Components/BlockComponent.h"
 #include "Components/PengoGridComponent.h"
 #include <algorithm>
+#include "HitboxComponent.h"
 
 void dae::EnemyManager::AddEnemyOnField(EnemyStateComponent* enemy)
 {
@@ -50,6 +51,7 @@ void dae::EnemyManager::Update(float)
     block->Destroy(false);
 
     enemy->SpawnEnemy();
+    enemy->GetOwnerGO()->GetComponent<HitboxComponent>()->SetEnabled(true);
     if (m_GridRPtr) m_GridRPtr->AddEnemyObject(enemy->GetOwnerGO());
     ++m_EnemiesOnField;
     m_EnemiesOnFieldVec.push_back(enemy);
