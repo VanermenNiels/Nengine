@@ -3,6 +3,8 @@
 namespace dae
 {
 	class PengoGridComponent;
+	class HealthComponent;
+
 	class LevelManager final : public ObserverComponent
 	{
 	public:
@@ -10,6 +12,7 @@ namespace dae
 		virtual ~LevelManager() = default;
 
 		void StartLevel();
+		void Update(float deltaTime) override;
 
 
 	protected:
@@ -18,5 +21,7 @@ namespace dae
 	private:
 		int m_CurrentLevel{};
 		PengoGridComponent* m_GridCompRPtr{};
+		HealthComponent* m_Player1Health{};
+
 	};
 }

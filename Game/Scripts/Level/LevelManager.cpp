@@ -180,15 +180,15 @@ void dae::LevelManager::StartLevel()
         m_GridCompRPtr, std::vector<dae::EventId>{ dae::EventIDs::PlayerMoved[0], dae::EventIDs::PlayerStop[0], dae::EventIDs::IceBlockPushed[0] }, 0);
 
     auto health = player1->AddComponent<dae::HealthComponent>(3, std::vector<dae::EventId>{ EventIDs::PlayerHit[0] });
+    m_Player1Health = health;
     auto playerHitbox = player1->AddComponent<dae::HitboxComponent>(
-        dae::Event{ dae::EventIDs::PlayerHit[0] },  // beginOEvent fires PlayerHit
-        dae::Event{},                                 // no endOEvent needed
+        dae::Event{ dae::EventIDs::PlayerHit[0] }, 
+        dae::Event{},                              
         32, 32
     );
-    playerHitbox->AddObserver(health);  // health reacts to PlayerHit
+    playerHitbox->AddObserver(health);
     playerHitbox->SetTargetTags(Tags::Enemy);
 
-    // NEW: register this player with the grid so GetPlayerCells() isn't empty
     m_GridCompRPtr->AddPlayerObject(player1.get());
 
     inputManager.BindKeyboardCommand(SDLK_W,
@@ -224,6 +224,15 @@ void dae::LevelManager::StartLevel()
         dae::InputManager::InputType::Pressed);
 
     scene.Add(std::move(player1));
+}
+
+void dae::LevelManager::Update(float deltaTime)
+{
+    if (m_Player1Health)
+    {
+        if (m_Player1Health->IsDead())
+            dae::SceneManager::GetInstance().CreateScene();
+    }
 }
 
 void dae::LevelManager::EventReaction(Event)
