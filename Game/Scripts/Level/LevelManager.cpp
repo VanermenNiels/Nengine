@@ -17,6 +17,7 @@
 #include "Commands/EventCommand.h"
 #include "Components/BlockComponent.h"
 #include "HitboxComponent.h"
+#include "EnemyManager.h"
 
 
 void dae::LevelManager::StartLevel()
@@ -38,6 +39,12 @@ void dae::LevelManager::StartLevel()
 
     dae::LevelLoader::GenerateAndSaveLevels("Data/levels.txt", 5, m_GridCompRPtr);
     const auto& spawnData = dae::LevelLoader::LoadLevel("Data/Levels.txt", m_CurrentLevel, m_GridCompRPtr);
+
+    // --- ENEMY MANAGER ---
+    auto eM = std::make_unique<dae::GameObject>();
+    auto eMRPtr { eM->AddComponent<EnemyManager>(std::vector<EventId>{EventIDs::EnemyKilled})};
+    eMRPtr->AddGrid(m_GridCompRPtr); // ADD THIS LINE
+    scene.Add(std::move(eM));
 
     // --- WALLS ---
     const auto& bounds{ m_GridCompRPtr->GetBounds() };
@@ -82,13 +89,13 @@ void dae::LevelManager::StartLevel()
             auto enemyGO = std::make_unique<dae::GameObject>();
             enemyGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
             enemyGO->AddComponent<dae::AnimatorComponent>();
-            enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, false);
-            enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, false);
+            auto state{ enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, false) };
             enemyGO->AddComponent<dae::HitboxComponent>(32, 32);
 
             enemyGO->SetPosition(data.position.x, data.position.y);
 
             m_GridCompRPtr->AddEnemyObject(enemyGO.get());
+            eMRPtr->AddEnemyOnField(state);
 
             scene.Add(std::move(enemyGO));
             break;
@@ -102,6 +109,7 @@ void dae::LevelManager::StartLevel()
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
             m_GridCompRPtr->AddBlockComponent(cell, cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
+            cellGO->GetComponent<dae::BlockComponent>()->GetSubject().AddObserver(eMRPtr);
 
             cellGO->SetPosition(data.position.x, data.position.y);
             scene.Add(std::move(cellGO));
@@ -116,10 +124,27 @@ void dae::LevelManager::StartLevel()
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
             m_GridCompRPtr->AddBlockComponent(cell, cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
+            cellGO->GetComponent<dae::BlockComponent>()->GetSubject().AddObserver(eMRPtr);
+            auto block{ cellGO->GetComponent<dae::BlockComponent>() };
 
             cellGO->SetPosition(data.position.x, data.position.y);
 
             scene.Add(std::move(cellGO));
+
+            auto enemyGO = std::make_unique<dae::GameObject>();
+            enemyGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
+            enemyGO->AddComponent<dae::AnimatorComponent>();
+            auto state{ enemyGO->AddComponent<dae::EnemyStateComponent>(m_GridCompRPtr, true) };
+            enemyGO->AddComponent<dae::HitboxComponent>(32, 32);
+
+            enemyGO->SetPosition(data.position.x, data.position.y);
+
+            m_GridCompRPtr->AddEnemyObject(enemyGO.get());
+            eMRPtr->AddEnemyInEgg(state, block);
+            block->SetEnemyGO(enemyGO.get());
+
+            scene.Add(std::move(enemyGO));
+
             break;
         }
 
@@ -132,6 +157,7 @@ void dae::LevelManager::StartLevel()
 
             auto cell{ m_GridCompRPtr->WorldToCell(data.position) };
             m_GridCompRPtr->AddBlockComponent(cell, cellGO->AddComponent<dae::BlockComponent>(cell, data.type, m_GridCompRPtr));
+            cellGO->GetComponent<dae::BlockComponent>()->GetSubject().AddObserver(eMRPtr);
 
             cellGO->SetPosition(data.position.x, data.position.y);
             scene.Add(std::move(cellGO));

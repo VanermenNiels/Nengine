@@ -17,5 +17,8 @@ void dae::EnemySquishedState::OnEnter(StateComponent& ctx, GameObject* gO)
 void dae::EnemySquishedState::Update(StateComponent& ctx, GameObject* gO, float deltaTime)
 {
     if (static_cast<EnemyStateComponent&>(ctx).GetAnimatorComp()->AnimationFinished())
+    {
         static_cast<EnemyStateComponent&>(ctx).GetAnimatorComp()->PlayAnimation(0, 0, 0, 0, 0, 0);
+        static_cast<EnemyStateComponent&>(ctx).SetDead();
+    }
 }

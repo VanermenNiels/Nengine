@@ -14,6 +14,10 @@ void dae::EnemySpawnState::OnEnter(StateComponent& ctx, GameObject* gO)
 
 void dae::EnemySpawnState::Update(StateComponent& ctx, GameObject* gO, float deltaTime)
 {
-	if (m_AnimCompRPtr->AnimationFinished()) 
+	if (!m_AnimCompRPtr) return;
+	if (m_AnimCompRPtr->AnimationFinished())
+	{
+		m_AnimCompRPtr = nullptr; // prevent re-triggering every frame
 		static_cast<EnemyStateComponent&>(ctx).StartMoving();
+	}
 }

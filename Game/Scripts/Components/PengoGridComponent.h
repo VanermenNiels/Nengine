@@ -49,6 +49,16 @@ namespace dae
 
         void RemoveBlockComponent(GridComponent::Cell cell);
 
+        void RemoveEnemyObject(GameObject* enemy) {
+            m_EnemiesVecRPtrs.erase
+            (
+                std::remove(m_EnemiesVecRPtrs.begin(),
+                    m_EnemiesVecRPtrs.end(),
+                    enemy),
+                m_EnemiesVecRPtrs.end()
+            );
+        }
+
     private:
         std::vector<GameObject*> m_PlayersVecRPtrs;
         std::vector<GameObject*> m_EnemiesVecRPtrs;

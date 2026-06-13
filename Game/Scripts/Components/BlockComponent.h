@@ -19,7 +19,9 @@ namespace dae
 
 		void Update(float deltaTime) override;
 		void Push(Direction dir);
-		void Destroy();
+		void Destroy(bool killEnemy = true);
+
+		void SetEnemyGO(GameObject* gO) { m_EnemyGO = gO; }
 		// Used later for enemies when they overlap to check if a block is currently moving.
 		Direction IsMoving() const { return m_CurrentDir; }
 
@@ -29,6 +31,7 @@ namespace dae
 		PengoGridComponent* m_GridRPtr;
 		Direction m_CurrentDir { Direction::Static };
 		std::unique_ptr<MoveCommand> m_MoveCommand{};
+		std::unique_ptr<MoveCommand> m_EnemyMoveCommand{};
 
 		GridComponent::Cell m_CurrentCell;
 		const GridComponent::Cell m_START_CELL;
@@ -41,7 +44,10 @@ namespace dae
 		HitboxComponent* m_Hitbox{};
 		std::vector<HitboxComponent*> m_EnemyHitboxes{};
 		std::vector<EnemyStateComponent*> m_EnemyStateComponents{};
-		EnemyStateComponent* m_CurrentGrabbedEnemy{};
+		std::vector<EnemyStateComponent*> m_CurrentGrabbedEnemies;
+
+		GameObject* m_EnemyGO{};
+
 		static const float SPEED;
 	};
 }

@@ -1,22 +1,36 @@
+#pragma once
 #include <vector>
 #include "Components/ObserverComponent.h"
+
 namespace dae
 {
-	class EnemyStateComponent;
-	class EnemyManager : public ObserverComponent
-	{
-	public:
-		using ObserverComponent::ObserverComponent;
+    class EnemyStateComponent;
+    class BlockComponent;
+    class PengoGridComponent;
 
-		void AddEnemy(EnemyStateComponent* enemy);
+    class EnemyManager : public ObserverComponent
+    {
+    public:
+        using ObserverComponent::ObserverComponent;
 
-	protected:
-		void EventReaction(Event event) override;
-	private:
-		std::vector<EnemyStateComponent*> m_Enemies{};
+        void Update(float deltaTime) override;
 
-		int m_EnemiesOnField{};
-		int m_EnemiesInEgg{};
+        void AddEnemyOnField(EnemyStateComponent* enemy);
+        void AddEnemyInEgg(EnemyStateComponent* enemy, BlockComponent* block);
+        void AddGrid(PengoGridComponent* grid) { m_GridRPtr = grid; }
 
-	};
+    protected:
+        void EventReaction(Event event) override;
+
+    private:
+        std::vector<EnemyStateComponent*> m_EnemiesOnFieldVec{};
+        std::vector<std::pair<EnemyStateComponent*, BlockComponent*>> m_EnemiesInEggVec{};
+
+        PengoGridComponent* m_GridRPtr{};
+        int m_EnemiesOnField{};
+        int m_EnemiesInEgg{};
+
+        EnemyStateComponent* m_PendingSpawnEnemy{ nullptr };
+        BlockComponent* m_PendingDestroyBlock{ nullptr };
+    };
 }

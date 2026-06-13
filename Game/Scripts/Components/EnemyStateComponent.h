@@ -13,18 +13,21 @@ namespace dae
 
         void SpawnEnemy();
         void StartMoving();
-        void RemoveEnemy(EnemyStateComponent* enemy) {ENEMIES.erase(std::remove(ENEMIES.begin(), ENEMIES.end(), enemy), ENEMIES.end());}
 
         void SetBeingPushed() { m_BeingPushed = true; }
         bool BeingPushed() { return m_BeingPushed; }
-
+        void SetDead();
+        bool IsDead() { return m_Dead; }
         AnimatorComponent* GetAnimatorComp();
         int GetEnemiesAlive() { return ENEMIES_ON_FIELD + ENEMIES_IN_EGG; }
         bool InEgg() { return m_InEgg; }
 
+        void RemoveGO() { GetOwner()->MarkForDeletion(); }
+        GameObject* GetOwnerGO() { return GetOwner(); }
     protected:
         void EventReaction(Event event) override;
     private:
+        bool m_Dead{};
         Direction m_CurrentDir{ Direction::Right };
         int m_Player{};
         PengoGridComponent* m_GridRPtr;
@@ -35,7 +38,6 @@ namespace dae
         static int ENEMIES_ON_FIELD;
         static int ENEMIES_IN_EGG;
 
-        static std::vector<EnemyStateComponent*> ENEMIES;
 
     };
 }
