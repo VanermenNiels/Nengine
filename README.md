@@ -159,3 +159,8 @@ All fetched via CMake `FetchContent`.
 
 - **Engine starting point**: [Minigin](https://github.com/avadae/minigin) by Alex Vanden Abeele
 - **Patterns reference**: [Game Programming Patterns](https://gameprogrammingpatterns.com/) by Robert Nystrom
+
+
+## Issue
+- The spawning of a new level does not completely work in release mode. The new level spawns in but you won't be able to move.
+- It fully works in debug you just have to remove the comments on line 116-118 in InputManager.cpp.

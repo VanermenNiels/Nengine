@@ -113,9 +113,9 @@ void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
 
 void dae::InputManager::ClearAllCommands()
 {
-    m_KeyBindings.clear();
+    /*m_KeyBindings.clear();
     for (auto& binding : m_ControllerBindings)
-        binding.clear();
+        binding.clear();*/
 }
 
 #ifndef __EMSCRIPTEN__
