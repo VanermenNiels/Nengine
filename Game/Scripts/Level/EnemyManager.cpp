@@ -19,14 +19,26 @@ void dae::EnemyManager::AddEnemyInEgg(EnemyStateComponent* enemy, BlockComponent
 
 void dae::EnemyManager::Update(float)
 {
-    if (!m_PendingSpawnEnemy) return;
+    if (m_PendingHatches.empty()) return;
 
-    auto* enemy = m_PendingSpawnEnemy;
-    auto* block = m_PendingDestroyBlock;
-    m_PendingSpawnEnemy = nullptr;
-    m_PendingDestroyBlock = nullptr;
+    auto& pending = m_PendingHatches.front();
+    auto* enemy = pending.enemy;
+    auto* block = pending.block;
 
-    // remove from egg vec BEFORE calling Destroy so EggDestroyed handler is a no-op
+    // block destroyed by collision/player — cancel this hatch
+    if (block && block->IsDestroyed())
+    {
+        m_PendingHatches.pop();
+        return;
+    }
+
+    // wait until block is stationary
+    if (block && block->IsMoving() != Direction::Static)
+        return;
+
+    m_PendingHatches.pop();
+
+    // remove from egg vec BEFORE calling Destroy
     m_EnemiesInEggVec.erase(
         std::remove_if(m_EnemiesInEggVec.begin(), m_EnemiesInEggVec.end(),
             [enemy](const auto& pair) { return pair.first == enemy; }),
@@ -34,10 +46,9 @@ void dae::EnemyManager::Update(float)
     );
     --m_EnemiesInEgg;
 
-    // play break animation on the block (fires EggDestroyed but vec is empty so handler skips)
-    if (block) block->Destroy(false);
+    block->SetHatchDestroy();
+    block->Destroy(false);
 
-    // spawn the enemy
     enemy->SpawnEnemy();
     if (m_GridRPtr) m_GridRPtr->AddEnemyObject(enemy->GetOwnerGO());
     ++m_EnemiesOnField;
@@ -56,36 +67,50 @@ void dae::EnemyManager::EventReaction(Event event)
             m_EnemiesOnFieldVec.end()
         );
 
-        if (!m_EnemiesInEggVec.empty())
+        // only hatch if under the cap and there are eggs
+        if (m_EnemiesOnField < MAX_ENEMIES_ON_FIELD && !m_EnemiesInEggVec.empty())
         {
-            m_PendingSpawnEnemy = m_EnemiesInEggVec[0].first;
-            m_PendingDestroyBlock = m_EnemiesInEggVec[0].second;
+            for (auto& [enemy, block] : m_EnemiesInEggVec)
+            {
+                bool alreadyQueued = false;
+                auto tempQueue = m_PendingHatches;
+                while (!tempQueue.empty())
+                {
+                    if (tempQueue.front().enemy == enemy) { alreadyQueued = true; break; }
+                    tempQueue.pop();
+                }
+                if (!alreadyQueued)
+                {
+                    m_PendingHatches.push({ enemy, block });
+                    break;
+                }
+            }
         }
     }
 
     if (event.id == EventIDs::EggDestroyed)
     {
-        // only reached when player directly destroys an egg block (not via hatching)
-        // because hatching removes the entry before calling Destroy
-        if (m_EnemiesInEggVec.empty()) return;
+        auto it = std::find_if(m_EnemiesInEggVec.begin(), m_EnemiesInEggVec.end(),
+            [](const auto& pair) { return pair.second->IsDestroyed(); });
+
+        if (it == m_EnemiesInEggVec.end()) return;
 
         --m_EnemiesInEgg;
-        for (auto it = m_EnemiesInEggVec.begin(); it != m_EnemiesInEggVec.end(); ++it)
+        auto [enemy, block] = *it;
+        m_EnemiesInEggVec.erase(it);
+
+        // cancel any pending hatch for this enemy
+        // rebuild queue without this enemy
+        std::queue<PendingHatch> filtered{};
+        auto tempQueue = m_PendingHatches;
+        while (!tempQueue.empty())
         {
-            auto [enemy, block] = *it;
-            if (enemy->IsDead())
-            {
-                enemy->RemoveGO();
-            }
-            else
-            {
-                enemy->SpawnEnemy();
-                if (m_GridRPtr) m_GridRPtr->AddEnemyObject(enemy->GetOwnerGO());
-                ++m_EnemiesOnField;
-                m_EnemiesOnFieldVec.push_back(enemy);
-            }
-            m_EnemiesInEggVec.erase(it);
-            break;
+            if (tempQueue.front().enemy != enemy)
+                filtered.push(tempQueue.front());
+            tempQueue.pop();
         }
+        m_PendingHatches = filtered;
+
+        enemy->RemoveGO();
     }
 }

@@ -128,7 +128,6 @@ void dae::LevelManager::StartLevel()
             auto block{ cellGO->GetComponent<dae::BlockComponent>() };
 
             cellGO->SetPosition(data.position.x, data.position.y);
-
             scene.Add(std::move(cellGO));
 
             auto enemyGO = std::make_unique<dae::GameObject>();
@@ -139,12 +138,11 @@ void dae::LevelManager::StartLevel()
 
             enemyGO->SetPosition(data.position.x, data.position.y);
 
-            m_GridCompRPtr->AddEnemyObject(enemyGO.get());
+            // DO NOT add to grid here — egg enemies are not active until hatched
             eMRPtr->AddEnemyInEgg(state, block);
             block->SetEnemyGO(enemyGO.get());
 
             scene.Add(std::move(enemyGO));
-
             break;
         }
 

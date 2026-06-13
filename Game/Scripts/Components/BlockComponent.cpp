@@ -185,6 +185,9 @@ void dae::BlockComponent::Push(Direction dir)
 
 void dae::BlockComponent::Destroy(bool killEnemy)
 {
+    if (m_IsDestroyed) return;
+    m_IsDestroyed = true;
+
     m_AnimatorRPtr = GetOwner()->GetComponent<AnimatorComponent>();
     m_AnimatorRPtr->PlayAnimation(0, 3, 32, 32, 8, 0.1f, false);
     m_GridRPtr->RemoveBlockComponent(m_CurrentCell);

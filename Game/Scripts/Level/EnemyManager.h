@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <queue>
 #include "Components/ObserverComponent.h"
 
 namespace dae
@@ -30,7 +31,13 @@ namespace dae
         int m_EnemiesOnField{};
         int m_EnemiesInEgg{};
 
-        EnemyStateComponent* m_PendingSpawnEnemy{ nullptr };
-        BlockComponent* m_PendingDestroyBlock{ nullptr };
+        struct PendingHatch
+        {
+            EnemyStateComponent* enemy;
+            BlockComponent* block;
+        };
+        std::queue<PendingHatch> m_PendingHatches{};
+
+        static constexpr int MAX_ENEMIES_ON_FIELD{ 3 };
     };
 }

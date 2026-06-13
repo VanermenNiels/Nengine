@@ -46,9 +46,9 @@ void dae::EnemyStateComponent::StartMoving()
 void dae::EnemyStateComponent::SetDead()
 {
 	m_Dead = true;
-	m_GridRPtr->RemoveEnemyObject(GetOwner());
+	if (!m_InEgg)
+		m_GridRPtr->RemoveEnemyObject(GetOwner());
 }
-
 dae::AnimatorComponent* dae::EnemyStateComponent::GetAnimatorComp()
 {
 	return GetOwner()->GetComponent<AnimatorComponent>();
