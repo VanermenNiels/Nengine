@@ -15,6 +15,7 @@ void dae::InputManager::InitializeControllers()
 
 bool dae::InputManager::ProcessInput(float deltaTime)
 {
+
     SDL_Event e;
     while (SDL_PollEvent(&e))
     {
@@ -34,7 +35,7 @@ bool dae::InputManager::ProcessInput(float deltaTime)
     for (const auto& [key, inputBinding] : m_KeyBindings)
     {
         SDL_Scancode scancode = SDL_GetScancodeFromKey(key, SDL_KMOD_NONE);
-        if (scancode == SDL_SCANCODE_UNKNOWN) continue;
+        if (scancode == SDL_SCANCODE_UNKNOWN || scancode >= numKeys) continue;
 
         if (!inputBinding.ignoreExclusiveGroup &&
             inputBinding.exclusiveGroup >= 0 &&
@@ -108,6 +109,13 @@ void dae::InputManager::BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Com
 void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
 {
     m_KeyBindings.erase(key);
+}
+
+void dae::InputManager::ClearAllCommands()
+{
+    m_KeyBindings.clear();
+    for (auto& binding : m_ControllerBindings)
+        binding.clear();
 }
 
 #ifndef __EMSCRIPTEN__

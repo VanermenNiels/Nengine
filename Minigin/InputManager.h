@@ -29,12 +29,14 @@ namespace dae
 
         void BindKeyboardCommand(SDL_Keycode key, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup = -1, bool ignoreExclusiveGroup = false);
         void UnBindKeyboardCommand(SDL_Keycode key);
+        void ClearAllCommands();
 
 #ifndef __EMSCRIPTEN__
         void BindControllerCommand(int controllerIndex, WORD button, std::unique_ptr<Command> command, InputType inputType, int exclusiveGroup = -1, bool ignoreExclusiveGroup = false);
 #endif
 
     private:
+
         struct InputBinding
         {
             InputType type;

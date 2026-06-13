@@ -37,14 +37,17 @@ namespace fs = std::filesystem;
 
 static void load()
 {
-    auto& scene = dae::SceneManager::GetInstance().CreateScene();
+    auto& persistentScene = dae::SceneManager::GetInstance().CreateScene();
+    persistentScene.SetPersistent(true);
+
     auto& inputManager = dae::InputManager::GetInstance();
     inputManager.InitializeControllers();
 
     auto levelManagerGO = std::make_unique<dae::GameObject>();
     auto levelManager = levelManagerGO->AddComponent<dae::LevelManager>(
         std::vector<dae::EventId>{ dae::EventIDs::StartSingleplayer, dae::EventIDs::StartMultiplayer });
-    scene.Add(std::move(levelManagerGO));
+    persistentScene.Add(std::move(levelManagerGO));
+
 
     inputManager.BindKeyboardCommand(SDLK_1,
         std::make_unique<dae::EventCommand>(nullptr, levelManager, dae::EventIDs::StartSingleplayer, 0),

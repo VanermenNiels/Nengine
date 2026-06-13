@@ -1,88 +1,161 @@
-﻿# Minigin
+﻿# Nengine
 
-Minigin is a very small project using [SDL3](https://www.libsdl.org/) and [glm](https://github.com/g-truc/glm) for 2D c++ game projects. It is in no way a game engine, only a barebone start project where everything sdl related has been set up. It contains glm for vector math, to aleviate the need to write custom vector and matrix classes.
+A 2D game engine built on top of the [Minigin](https://github.com/avadae/minigin) framework from DAE, written in C++.
+Used to recreate *(write about the game)* as the exam project for the Programming 4 course at DAE.
 
-[![Build Status](https://github.com/avadae/minigin/actions/workflows/cmake.yml/badge.svg)](https://github.com/avadae/cmake/actions)
-[![Build Status](https://github.com/avadae/minigin/actions/workflows/emscripten.yml/badge.svg)](https://github.com/avadae/emscripten/actions)
-[![GitHub Release](https://img.shields.io/github/v/release/avadae/minigin?logo=github&sort=semver)](https://github.com/avadae/minigin/releases/latest)
+[![Build Status](https://github.com/VanermenNiels/Nengine/actions/workflows/cmake.yml/badge.svg)](https://github.com/VanermenNiels/Nengine/actions)
 
-# Goal
+---
 
-Minigin can/may be used as a start project for the exam assignment in the course [Programming 4](https://youtu.be/j96Oh6vzhmg) at DAE. In that assignment students need to recreate a popular 80's arcade game with a game engine they need to program themselves. During the course we discuss several game programming patterns, using the book '[Game Programming Patterns](https://gameprogrammingpatterns.com/)' by [Robert Nystrom](https://github.com/munificent) as reading material. 
+## Project Structure
 
-# Disclaimer
+```
+Nengine/
+├── Minigin/                  # Engine library (static lib)
+│   ├── AnimatorComponent     # Spritesheet animation, frame-based playback
+│   ├── RenderComponent       # SDL3 texture rendering
+│   ├── HitboxComponent       # AABB collision and overlap detection
+│   ├── HealthComponent       # Hit tracking and death detection
+│   ├── InputManager          # Keyboard + XInput gamepad, command binding
+│   ├── SceneManager          # Scene creation and lifecycle
+│   ├── Scene                 # GameObject container, update/render loop
+│   ├── GameObject            # Entity with component attachment (ECS-style)
+│   ├── EventQueue            # Observer-based event system
+│   └── Sound/                # Service locator, SDL3_mixer (dedicated thread)
+└── Game/                     # Game executable
+    ├── Scripts/
+    │   ├── Level/            # LevelManager, LevelLoader, grid setup
+    │   └── Components/       # PengoGridComponent, BlockComponent, state components
+    ├── Commands/             # EventCommand, MoveCommand
+    ├── States/               # Enemy and player FSM states
+    └── Data/                 # Level files, spritesheets, audio
+```
 
-Minigin is, despite perhaps the suggestion in its name, **not** a game engine. It is just a very simple SDL3 ready project with some of the scaffolding in place to get started. None of the patterns discussed in the course are used yet (except singleton which use we challenge during the course). It is up to the students to implement their own vision for their engine, apply patterns as they see fit, create their game as efficient as possible.
+**Two CMake targets**: `minigin` (static library) and the game executable. The engine has no knowledge of the game; all game-specific code lives in the game project.
 
-# Use
+---
 
-Get the source from this project, or since students need to have their work on github too, they can use this repository as a template. Hit the "Use this template" button on the top right corner of the github page of this project.
+## Engine Architecture & Design Choices
 
-## Windows version
+### Game Loop
 
-Either
-- Open the root folder in Visual Studio 2026; this will be recognized as a cmake project.
-  
-Or
-- Install CMake 
-- Install CMake and CMake Tools extensions in Visual Code
-- Open the root folder in Visual Code,  this will be recognized as a cmake project.
+Runs at ~60 FPS. Each frame processes SDL events, dispatches input, updates all scenes, then renders. Delta time is passed down to every component's `Update(float deltaTime)`.
 
-Or
-- Use whatever editor you like :)
+### Entity-Component System
 
-## Emscripten (web) version
+`GameObject` is the entity. Components inherit from a base class and are added via `AddComponent<T>(args...)`. Each `GameObject` holds its components and forwards `Update` and `Render` calls to them. Tags are supported for filtering (e.g. `Tags::Player`, `Tags::Enemy`).
 
-### On windows
+### Command Pattern
 
-For installing all of the needed tools on Windows I recommend using [Chocolatey](https://chocolatey.org/). You can then run the following in a terminal to install what is needed:
+Abstract `Command` with `Execute()` decouples input from logic. `InputManager` binds keyboard keys and gamepad buttons to `unique_ptr<Command>` instances. `EventCommand` is the primary command, firing an event ID toward a target state component.
 
-    choco install -y cmake
-    choco install -y emscripten
-    choco install -y ninja
-    choco install -y python
+### Observer & Event System
 
-In a terminal, navigate to the root folder. Run this: 
+Components expose a `Subject` that other systems can subscribe to as observers. Events carry an ID and an optional integer payload. Used throughout for player hits, enemy kills, egg destruction, and game mode transitions.
 
-    mkdir build_web
-    cd build_web
-    emcmake cmake ..
-    emmake ninja
+### Input
 
-To be able to see the webpage you can start a python webserver in the build_web folder
+`InputManager` supports both keyboard (SDL3 keycodes) and Xbox gamepad (XInput, Windows only). Commands are bound per key/button with a trigger type: `Pressed`, `Released`, or `Down`. An optional animation group can be passed to coordinate visual state with input.
 
-    python -m http.server
+### Audio
 
-Then browse to http://localhost:8000 and you're good to go.
+`ServiceLocator` provides global access to `ISoundService` with a `NullSoundService` fallback (used on Emscripten). The concrete `SDLMixerSoundService` runs a dedicated audio thread with a command queue, communicating via `mutex` + `condition_variable`. Call anywhere via:
 
-### On OSX
+```cpp
+ServiceLocator::GetSoundService().Play("Sounds/MySound.wav", 100);
+```
 
-On Mac you can use homebrew
+### State Machine
 
-    brew install cmake
-    brew install emscripten
-    brew install python
+Enemy and player behaviour is driven by state components (`EnemyStateComponent`, `PengoStateComponent`) that hold a current `unique_ptr<State>` and transition on events. States implement `OnEnter`, `OnExit`, and `Update`.
 
-In a terminal on OSX, navigate to the root folder. Run this: 
+### Collision
 
-    mkdir build_web
-    cd build_web
-    emcmake cmake .. -DCMAKE_OSX_ARCHITECTURES=""
-    emmake make
+`HitboxComponent` does AABB overlap checks each frame against tagged targets. It fires a configurable `Event` on overlap and supports enable/disable for things like enemies inside egg blocks.
 
-To be able to see the webpage you can start a python webserver in the build_web folder
+---
 
-    python3 -m http.server
+## Game Features
 
-Then browse to http://localhost:8000 and you're good to go.
+*(Write about the game)*
 
-## Github Actions
+---
 
-This project is build with github actions.
-- The CMake workflow builds the project in Debug and Release for Windows and serves as a check that the project builds on that platform.
-- The Emscripten workflow generates a web version of the project and publishes it as a [github page](https://avadae.github.io/minigin/). 
-  - The url of that page will be `https://<username>.github.io/<repository>/`
-- You can embed this page with 
+## Controls
 
-```<iframe style="position: absolute; top: 0px; left: 0px; width: 1024px; height: 576px;" src="https://<username>.github.io/<repository>/" loading="lazy"></iframe>```
+### Keyboard (Player 1)
 
+| Key | Action |
+|-----|--------|
+| **W / A / S / D** | Move |
+| **Arrow keys** | Move (alternative) |
+| **Q** | Push ice block |
+
+### Gamepad (Player 2)
+
+| Button | Action |
+|--------|--------|
+| **D-Pad** | Move |
+| **A** | Push ice block |
+
+### Global
+
+| Key | Action |
+|-----|--------|
+| **1** | Start singleplayer |
+| **2** | Start multiplayer |
+
+---
+
+## Patterns Used
+
+| Pattern | Where |
+|---------|-------|
+| **Component (ECS)** | `GameObject` + component hierarchy |
+| **Command** | Input binding: `EventCommand`, `MoveCommand` |
+| **Observer** | `Subject` + observer interface across gameplay systems |
+| **State** | `EnemyStateComponent`, `PengoStateComponent` |
+| **Service Locator** | `ServiceLocator::GetSoundService()` |
+| **Null Object** | `NullSoundService` (Emscripten fallback) |
+| **Game loop** | |`Minigin`|
+
+---
+
+## Building
+
+### Windows
+
+Open the root folder in Visual Studio or any CMake-aware editor. The project is configured via `CMakeLists.txt` and `CMakePresets.json`.
+
+### Emscripten (Web)
+
+```bash
+mkdir build_web
+cd build_web
+emcmake cmake ..
+emmake ninja
+python -m http.server
+```
+
+Then open `http://localhost:8000`.
+
+---
+
+## Dependencies
+
+- **SDL3** — windowing, input, rendering
+- **SDL3_mixer** — audio playback
+- **glm** — vector math
+
+All fetched via CMake `FetchContent`.
+
+---
+
+## Source Control
+
+[GitHub Repository](https://github.com/VanermenNiels/Nengine)
+
+## Credits
+
+- **Engine starting point**: [Minigin](https://github.com/avadae/minigin) by Alex Vanden Abeele
+- **Patterns reference**: [Game Programming Patterns](https://gameprogrammingpatterns.com/) by Robert Nystrom

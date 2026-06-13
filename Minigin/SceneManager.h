@@ -19,7 +19,7 @@ namespace dae
 		Scene& GetActiveScene();
 	private:
 		friend class Singleton<SceneManager>;
-		SceneManager() = default;
+		SceneManager() { m_scenes.reserve(16); }
 		std::vector<std::unique_ptr<Scene>> m_scenes{};
 	};
 }

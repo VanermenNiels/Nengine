@@ -24,6 +24,7 @@ namespace dae
         void EventReaction(Event event) override;
 
     private:
+        bool m_PendingNextLevel{};
         int m_CurrentLevel{};
         PengoGridComponent* m_GridCompRPtr{};
         std::vector<HealthComponent*> m_PlayerHealths{};

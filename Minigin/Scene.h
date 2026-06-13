@@ -25,6 +25,9 @@ namespace dae
 		bool IsActive() const { return m_IsActive; }
 		void SetActive(bool active) { m_IsActive = active; }
 
+		void SetPersistent(bool persistent) { m_IsPersistent = persistent; }
+		bool IsPersistent() const { return m_IsPersistent; }
+
 	private:
 		friend class SceneManager;
 		explicit Scene() = default;
@@ -33,7 +36,10 @@ namespace dae
 
 		std::vector<GameObject*> m_ObjectsToRemove{};
 
+		bool m_IsPersistent{};
+
 		bool m_IsActive{};
+
 	};
 
 }

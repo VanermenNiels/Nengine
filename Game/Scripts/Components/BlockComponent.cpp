@@ -1,4 +1,4 @@
-#pragma once
+#include "Sound/ServiceLocator.h"
 #include "BlockComponent.h"
 #include "GameObject.h"
 #include "PengoGridComponent.h"
@@ -189,6 +189,8 @@ void dae::BlockComponent::Destroy(bool killEnemy)
 {
     if (m_IsDestroyed) return;
     m_IsDestroyed = true;
+    ServiceLocator::GetSoundService().Play("Data/IceBlockDestroy.mp3", 100);
+
 
     m_AnimatorRPtr = GetOwner()->GetComponent<AnimatorComponent>();
     m_AnimatorRPtr->PlayAnimation(0, 3, 32, 32, 8, 0.1f, false);

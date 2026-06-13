@@ -4,10 +4,11 @@
 
 void dae::SceneManager::Update(float deltaTime)
 {
-	for(auto& scene : m_scenes)
+	const size_t count = m_scenes.size();
+	for (size_t i = 0; i < count; ++i)
 	{
-		if (scene->IsActive())
-			scene->Update(deltaTime);
+		if (m_scenes[i] && m_scenes[i]->IsActive())
+			m_scenes[i]->Update(deltaTime);
 	}
 }
 
@@ -15,7 +16,7 @@ void dae::SceneManager::Render()
 {
 	for (const auto& scene : m_scenes)
 	{
-		if (scene->IsActive()) 
+		if (scene && scene->IsActive())
 			scene->Render();
 	}
 }
@@ -24,7 +25,7 @@ dae::Scene& dae::SceneManager::GetActiveScene()
 {
 	for (auto& scene : m_scenes)
 	{
-		if (scene->IsActive())
+		if (scene && scene->IsActive())
 			return *scene;
 	}
 	throw std::runtime_error("No active scene found");
@@ -34,7 +35,7 @@ dae::Scene& dae::SceneManager::CreateScene()
 {
 	for (const auto& scene : m_scenes)
 	{
-		if (scene->IsActive())
+		if (scene && scene->IsActive() && !scene->IsPersistent())
 			scene->SetActive(false);
 	}
 	m_scenes.emplace_back(new Scene());

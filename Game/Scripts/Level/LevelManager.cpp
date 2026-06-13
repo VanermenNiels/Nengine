@@ -212,11 +212,14 @@ static void BindPlayer1Keys(
 
 void dae::LevelManager::StartSinglePlayerLevel()
 {
+    m_PlayerHealths.clear();
+    m_EnemyManager = nullptr;
+
     m_Mode = Modes::SinglePlayer;
     constexpr int PLAYER1_ANIM_GROUP = 2;
 
     auto& inputManager = dae::InputManager::GetInstance();
-    auto& scene = dae::SceneManager::GetInstance().GetActiveScene();
+    auto& scene = dae::SceneManager::GetInstance().CreateScene();
 
     auto gridGO = std::make_unique<dae::GameObject>();
     gridGO->SetPosition(0, 0);
@@ -259,6 +262,7 @@ void dae::LevelManager::StartSinglePlayerLevel()
     playerHitbox->SetTargetTags(Tags::Enemy);
     m_GridCompRPtr->AddPlayerObject(player1.get());
 
+    inputManager.ClearAllCommands();
     BindPlayer1Keys(inputManager, player1.get(), stateComp1, PLAYER1_ANIM_GROUP);
 
     scene.Add(std::move(player1));
@@ -266,12 +270,15 @@ void dae::LevelManager::StartSinglePlayerLevel()
 
 void dae::LevelManager::StartMultiplayerLevel()
 {
+    m_PlayerHealths.clear();
+    m_EnemyManager = nullptr;
+
     m_Mode = Modes::Multiplayer;
     constexpr int PLAYER1_ANIM_GROUP = 2;
     constexpr int PLAYER2_ANIM_GROUP = 3;
 
     auto& inputManager = dae::InputManager::GetInstance();
-    auto& scene = dae::SceneManager::GetInstance().GetActiveScene();
+    auto& scene = dae::SceneManager::GetInstance().CreateScene();
 
     // --- GRID SETUP ---
     auto gridGO = std::make_unique<dae::GameObject>();
@@ -322,6 +329,7 @@ void dae::LevelManager::StartMultiplayerLevel()
     playerHitbox1->SetTargetTags(Tags::Enemy);
     m_GridCompRPtr->AddPlayerObject(player1.get());
 
+    inputManager.ClearAllCommands();
     BindPlayer1Keys(inputManager, player1.get(), stateComp1, PLAYER1_ANIM_GROUP);
 
     scene.Add(std::move(player1));
@@ -423,11 +431,34 @@ void dae::LevelManager::Update(float)
 
     if (m_EnemyManager && m_EnemyManager->AllEnemiesDead())
     {
-        auto& scene = dae::SceneManager::GetInstance().CreateScene();
-        auto winGO = std::make_unique<GameObject>();
-        winGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
-        winGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(4, 2, 32, 32, 2, 0.15f);
-        winGO->SetPosition(240, 300);
-        scene.Add(std::move(winGO));
+
+        if (m_CurrentLevel < 4)
+        {
+            ++m_CurrentLevel;
+            switch (m_Mode)
+            {
+            case dae::LevelManager::Modes::SinglePlayer:
+                m_Started = true;
+                StartSinglePlayerLevel();
+                break;
+            case dae::LevelManager::Modes::Multiplayer:
+                m_Started = true;
+                StartMultiplayerLevel();
+                break;
+            default:
+                break;
+            }
+        }
+
+        else
+        {
+            auto& scene = dae::SceneManager::GetInstance().CreateScene();
+            auto winGO = std::make_unique<GameObject>();
+            winGO->AddComponent<dae::RenderComponent>()->SetTexture("SpriteSheets/PengoCharactersSprites2.png");
+            winGO->AddComponent<dae::AnimatorComponent>()->PlayAnimation(4, 2, 32, 32, 2, 0.15f);
+            winGO->SetPosition(240, 300);
+            scene.Add(std::move(winGO));
+        }
+        
     }
 }
