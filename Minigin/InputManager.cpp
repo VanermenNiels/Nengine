@@ -2,6 +2,8 @@
 #include <SDL3/SDL.h>
 #include "InputManager.h"
 #include <set>
+#include <SDL3/SDL_keycode.h>
+//#include <SDL3/SDL_keycode.h>
 
 void dae::InputManager::InitializeControllers()
 {
@@ -34,7 +36,7 @@ bool dae::InputManager::ProcessInput(float deltaTime)
 
     for (const auto& [key, inputBinding] : m_KeyBindings)
     {
-        SDL_Scancode scancode = SDL_GetScancodeFromKey(key, SDL_KMOD_NONE);
+        auto scancode = SDL_GetScancodeFromKey(key, SDL_KMOD_NONE);
         if (scancode == SDL_SCANCODE_UNKNOWN || scancode >= numKeys) continue;
 
         if (!inputBinding.ignoreExclusiveGroup &&
@@ -113,9 +115,12 @@ void dae::InputManager::UnBindKeyboardCommand(SDL_Keycode key)
 
 void dae::InputManager::ClearAllCommands()
 {
-    /*m_KeyBindings.clear();
+    for (auto& [key, binding] : m_KeyBindings)
+    {
+        UnBindKeyboardCommand(key);
+    }
     for (auto& binding : m_ControllerBindings)
-        binding.clear();*/
+        binding.clear();
 }
 
 #ifndef __EMSCRIPTEN__
